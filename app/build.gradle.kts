@@ -19,9 +19,6 @@ android {
         versionCode = 75
         versionName = "0.18.0-player.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        ndk {
-            abiFilters += "armeabi-v7a"
-        }
     }
 
     buildFeatures {
