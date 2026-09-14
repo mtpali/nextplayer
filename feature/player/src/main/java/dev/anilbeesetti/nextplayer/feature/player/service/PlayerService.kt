@@ -22,6 +22,7 @@ import androidx.media3.common.Player.DISCONTINUITY_REASON_SEEK
 import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.common.Tracks
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.ExoPlaybackException
 import androidx.media3.exoplayer.analytics.AnalyticsListener
@@ -47,8 +48,6 @@ import dev.anilbeesetti.nextplayer.core.common.extensions.getPath
 import dev.anilbeesetti.nextplayer.core.common.extensions.subtitleCacheDir
 import dev.anilbeesetti.nextplayer.core.data.repository.MediaRepository
 import dev.anilbeesetti.nextplayer.core.data.repository.PreferencesRepository
-import dev.anilbeesetti.nextplayer.core.media.network.NetworkUri
-import dev.anilbeesetti.nextplayer.core.media.network.datasource.NextDataSourceFactory
 import dev.anilbeesetti.nextplayer.core.model.LoopMode
 import dev.anilbeesetti.nextplayer.core.model.PlayerPreferences
 import dev.anilbeesetti.nextplayer.core.model.Resume
@@ -103,9 +102,6 @@ class PlayerService : MediaSessionService() {
 
     @Inject
     lateinit var preferencesRepository: PreferencesRepository
-
-    @Inject
-    lateinit var dataSourceFactory: NextDataSourceFactory
 
     @Inject
     lateinit var mediaRepository: MediaRepository
@@ -684,7 +680,9 @@ class PlayerService : MediaSessionService() {
             .setRenderersFactory(renderersFactory)
             .setTrackSelector(trackSelector)
             .setMediaSourceFactory(
-                DefaultMediaSourceFactory(applicationContext).setDataSourceFactory(dataSourceFactory),
+                DefaultMediaSourceFactory(applicationContext).setDataSourceFactory(
+                    DefaultDataSource.Factory(applicationContext),
+                ),
             )
             .setAudioAttributes(
                 AudioAttributes.Builder()
@@ -989,7 +987,7 @@ class PlayerService : MediaSessionService() {
 
     private fun MediaItem.isNetworkMediaItem(): Boolean {
         val uri = localConfiguration?.uri ?: return false
-        return uri.scheme?.lowercase() in REMOTE_SCHEMES || NetworkUri.isNetworkUri(uri)
+        return uri.scheme?.lowercase() in REMOTE_SCHEMES
     }
 
     private fun MediaItem.withArtwork(uri: Uri): MediaItem = buildUpon()

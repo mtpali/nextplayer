@@ -15,8 +15,5 @@ object DaoModule {
     fun provideHiddenVideoDao(db: MediaDatabase) = db.hiddenVideoDao()
 
     @Provides
-    fun provideNetworkConnectionDao(db: MediaDatabase) = db.networkConnectionDao()
-
-    @Provides
     fun providePlaylistDao(db: MediaDatabase) = db.playlistDao()
 }

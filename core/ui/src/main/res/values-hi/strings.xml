@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="z_a">Z-A</string>
-    <string name="permission_info">Next Player ऐप को मीडिया तक पहुंचने और चलाने के लिए \"%1$s\" अनुमति की आवश्यकता है। इसके बिना, मीडिया एक्सेस और प्लेबैक काम नहीं करेगा। ऐप का पूरा उपयोग करने के लिए अनुमति दें।</string>
-    <string name="permission_settings">Next Player ऐप को मीडिया तक पहुंचने और चलाने के लिए \"%1$s\" अनुमति की आवश्यकता है। इसके बिना, मीडिया एक्सेस और प्लेबैक काम नहीं करेगा। ऐप को पूरी तरह से उपयोग करने के लिए, सेटिंग्स से अनुमति दें क्योंकि इसे स्थायी रूप से अस्वीकार कर दिया गया था।</string>
+    <string name="permission_info">Player ऐप को मीडिया तक पहुंचने और चलाने के लिए \"%1$s\" अनुमति की आवश्यकता है। इसके बिना, मीडिया एक्सेस और प्लेबैक काम नहीं करेगा। ऐप का पूरा उपयोग करने के लिए अनुमति दें।</string>
+    <string name="permission_settings">Player ऐप को मीडिया तक पहुंचने और चलाने के लिए \"%1$s\" अनुमति की आवश्यकता है। इसके बिना, मीडिया एक्सेस और प्लेबैक काम नहीं करेगा। ऐप को पूरी तरह से उपयोग करने के लिए, सेटिंग्स से अनुमति दें क्योंकि इसे स्थायी रूप से अस्वीकार कर दिया गया था।</string>
     <string name="play_pause_ff_rewind">प्ले/पॉज और फास्ट फॉरवर्ड/रिवाइंड</string>
     <string name="no">नही</string>
     <string name="system_default">सिस्टम डिफॉल्ट</string>
@@ -363,12 +363,6 @@
     <string name="cannot_move_to_same_folder">एक ही फ़ोल्डर में मूव नहीं कर सकते</string>
     <string name="edit">एडिट करें</string>
     <string name="retry">फिर से कोशिश करें</string>
-    <string name="failed_to_load_folder">यह लोकेशन लोड नहीं हो सकी</string>
-    <string name="empty_folder">यह फ़ोल्डर खाली है</string>
-    <string name="no_connections_description">अपने नेटवर्क से वीडियो ब्राउज़ करने और चलाने के लिए SMB, FTP या WebDAV कनेक्शन जोड़ें।</string>
-    <string name="no_connections_title">अभी तक कोई कनेक्शन नहीं</string>
-    <string name="connection_failed">कनेक्ट नहीं हो सका। डिटेल चैक करें और फिर से कोशिश करें।</string>
     <string name="home">घर</string>
     <string name="network">नेटवर्क</string>
-    <string name="add_connection">नेटवर्क जोड़ें</string>
 </resources>

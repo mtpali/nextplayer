@@ -38,6 +38,7 @@ fun PlayerContentFrame(
     videoZoomAndContentScaleState: VideoZoomAndContentScaleState,
     volumeAndBrightnessGestureState: VolumeAndBrightnessGestureState,
     subtitleConfiguration: SubtitleConfiguration,
+    onVideoBoundsChanged: (Rect) -> Unit = {},
 ) {
     val presentationState = rememberPresentationState(player)
     PlayerSurface(
@@ -62,6 +63,7 @@ fun PlayerContentFrame(
                     bounds.bottom.toInt(),
                 )
                 pictureInPictureState.setVideoViewRect(rect)
+                onVideoBoundsChanged(rect)
             }
             .graphicsLayer {
                 scaleX = videoZoomAndContentScaleState.zoom
