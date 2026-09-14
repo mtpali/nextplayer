@@ -517,4 +517,5 @@
     <string name="store_address_one">Ketalem branch: Next to Shahid Beheshti School</string>
     <string name="store_address_two">Ramsar branch: Abrisham Mahalleh, next to Refah Bank</string>
     <string name="player_version">Player %1$s</string>
+    <string name="open_source_licenses">Open-source licenses</string>
 </resources>

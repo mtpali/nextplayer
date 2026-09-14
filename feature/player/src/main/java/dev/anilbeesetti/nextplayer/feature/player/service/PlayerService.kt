@@ -88,7 +88,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.guava.future
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 
@@ -755,9 +754,6 @@ class PlayerService : MediaSessionService() {
             mediaSession = null
         }
         subtitleCacheDir.deleteFiles()
-        // Drop the network connection before the scope dies, so a share isn't held open for the
-        // lifetime of the process after playback ends.
-        runBlocking { dataSourceFactory.release() }
         serviceScope.cancel()
     }
 
