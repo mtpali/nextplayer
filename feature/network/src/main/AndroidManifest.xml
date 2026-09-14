@@ -5,7 +5,7 @@
             android:name=".download.DownloadRequestActivity"
             android:exported="true"
             android:label="@string/download_with_player"
-            android:theme="@android:style/Theme.DeviceDefault.Dialog.Alert.NoActionBar">
+            android:theme="@android:style/Theme.DeviceDefault.Dialog.Alert">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
