@@ -26,7 +26,7 @@ third-party protocol dependencies have been removed.
 Use JDK 17 and the checked-in wrapper:
 
 ```bash
-./gradlew assembleReleaseWithDebugSigning
+./gradlew assembleRelease-with-debug-signing
 ```
 
 The ARMv7 APK is written to:

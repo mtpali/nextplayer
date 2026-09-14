@@ -29,7 +29,7 @@ jobs:
           gradle-home-cache-cleanup: true
 
       - name: Build ARMv7 debug and minified APKs
-        run: ./gradlew assembleDebug assembleReleaseWithDebugSigning
+        run: ./gradlew assembleDebug assembleRelease-with-debug-signing
 
       - name: Run Local Tests
         run: ./gradlew test
