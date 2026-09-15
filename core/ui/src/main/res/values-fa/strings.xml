@@ -381,6 +381,11 @@
     <string name="download_paused">توسط سیستم متوقف شده</string>
     <string name="download_complete">تکمیل شده</string>
     <string name="download_progress">%1$d٪ دانلود شده</string>
+    <string name="download_size_progress">%1$s از %2$s</string>
+    <string name="download_remaining">%1$s باقی‌مانده</string>
+    <string name="download_speed">%1$s/ثانیه</string>
+    <string name="download_speed_calculating">در حال محاسبه سرعت…</string>
+    <string name="download_threads">%1$d اتصال هم‌زمان</string>
     <string name="remove_download">دانلود حذف شود؟</string>
     <string name="remove_download_confirmation">«%1$s» و فایل دانلودشده حذف می‌شوند.</string>
     <string name="download_with_player">دانلود با Player</string>

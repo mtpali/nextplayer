@@ -498,6 +498,11 @@
     <string name="download_paused">Paused by the system</string>
     <string name="download_complete">Complete</string>
     <string name="download_progress">%1$d%% downloaded</string>
+    <string name="download_size_progress">%1$s / %2$s</string>
+    <string name="download_remaining">%1$s remaining</string>
+    <string name="download_speed">%1$s/s</string>
+    <string name="download_speed_calculating">Calculating speed…</string>
+    <string name="download_threads">%1$d connections</string>
     <string name="remove_download">Remove download?</string>
     <string name="remove_download_confirmation">This removes “%1$s” and its downloaded file.</string>
     <string name="download_with_player">Download with Player</string>

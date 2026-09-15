@@ -38,9 +38,17 @@ class DownloadRequestActivity : ComponentActivity() {
     }
 
     private fun extractUrl(intent: Intent): String? {
-        return intent.dataString
-            ?: intent.getStringExtra(Intent.EXTRA_TEXT)
-                ?.trim()
-                ?.takeIf { it.startsWith("http://") || it.startsWith("https://") }
+        val candidates = listOfNotNull(
+            intent.dataString,
+            intent.getStringExtra(Intent.EXTRA_TEXT),
+            intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString(),
+        )
+        return candidates.firstNotNullOfOrNull { value ->
+            HTTP_URL.find(value)?.value
+        }
+    }
+
+    private companion object {
+        val HTTP_URL = Regex("""https?://[^\s<>"]+""", RegexOption.IGNORE_CASE)
     }
 }

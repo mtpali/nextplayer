@@ -57,6 +57,7 @@ import dev.anilbeesetti.nextplayer.core.ui.extensions.copy
 import dev.anilbeesetti.nextplayer.core.ui.theme.NextPlayerTheme
 import dev.anilbeesetti.nextplayer.feature.network.download.DownloadStatus
 import dev.anilbeesetti.nextplayer.feature.network.download.ManagedDownload
+import dev.anilbeesetti.nextplayer.feature.network.download.formatByteCount
 import kotlin.math.roundToInt
 
 @Composable
@@ -154,7 +155,7 @@ internal fun NetworkScreenContent(
                         DownloadItem(
                             item = item,
                             onOpen = { onAction(NetworkAction.OpenDownload(item.id)) },
-                            onRetry = { onAction(NetworkAction.EnqueueDownload(item.source)) },
+                            onRetry = { onAction(NetworkAction.RetryDownload(item.id)) },
                             onRemove = { downloadToRemove = item },
                         )
                     }
@@ -315,6 +316,50 @@ private fun DownloadItem(
                     )
                 } ?: LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
+            if (item.totalBytes > 0L) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = stringResource(
+                            R.string.download_size_progress,
+                            formatByteCount(item.downloadedBytes),
+                            formatByteCount(item.totalBytes),
+                        ),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    item.remainingBytes?.let { remaining ->
+                        Text(
+                            text = stringResource(R.string.download_remaining, formatByteCount(remaining)),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+            if (item.status == DownloadStatus.RUNNING || item.status == DownloadStatus.PENDING) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = if (item.bytesPerSecond > 0L) {
+                            stringResource(R.string.download_speed, formatByteCount(item.bytesPerSecond))
+                        } else {
+                            stringResource(R.string.download_speed_calculating)
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Text(
+                        text = stringResource(R.string.download_threads, item.threadCount),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
     }
 }
@@ -374,6 +419,8 @@ private fun NetworkScreenPreview() {
                         mimeType = "video/mp4",
                         downloadedBytes = 50,
                         totalBytes = 100,
+                        bytesPerSecond = 20,
+                        threadCount = 8,
                         status = DownloadStatus.RUNNING,
                         reason = 0,
                         updatedAt = 0,

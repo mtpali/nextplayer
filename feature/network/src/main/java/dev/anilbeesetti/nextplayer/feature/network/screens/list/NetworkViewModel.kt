@@ -76,6 +76,14 @@ class NetworkViewModel @AssistedInject constructor(
             is NetworkAction.OpenDownload -> {
                 if (!downloads.open(action.id)) showMessage(NetworkMessage.CANNOT_OPEN_DOWNLOAD)
             }
+            is NetworkAction.RetryDownload -> {
+                if (downloads.retry(action.id)) {
+                    showMessage(NetworkMessage.DOWNLOAD_STARTED)
+                    refresh()
+                } else {
+                    showMessage(NetworkMessage.DOWNLOAD_FAILED)
+                }
+            }
             is NetworkAction.RemoveDownload -> {
                 downloads.remove(action.id)
                 refresh()
@@ -124,5 +132,6 @@ sealed interface NetworkAction {
     data class OpenStream(val url: String) : NetworkAction
     data class EnqueueDownload(val url: String) : NetworkAction
     data class OpenDownload(val id: Long) : NetworkAction
+    data class RetryDownload(val id: Long) : NetworkAction
     data class RemoveDownload(val id: Long) : NetworkAction
 }
