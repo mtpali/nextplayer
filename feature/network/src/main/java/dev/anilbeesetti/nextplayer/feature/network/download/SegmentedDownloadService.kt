@@ -59,6 +59,8 @@ internal fun splitIntoRanges(
 class SegmentedDownloadService : Service() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val jobs = ConcurrentHashMap<Long, Job>()
+    private val cancelledDownloads = ConcurrentHashMap.newKeySet<Long>()
+    private val notificationLock = Any()
     private lateinit var store: DownloadStore
     private lateinit var notificationManager: NotificationManager
     private var foregroundStarted = false
@@ -75,7 +77,7 @@ class SegmentedDownloadService : Service() {
         val id = intent?.getLongExtra(EXTRA_DOWNLOAD_ID, -1L) ?: -1L
         when (intent?.action) {
             ACTION_START -> if (id >= 0L) startDownload(id)
-            ACTION_CANCEL -> if (id >= 0L) jobs.remove(id)?.cancel()
+            ACTION_CANCEL -> if (id >= 0L) cancelDownload(id)
         }
         if (jobs.isEmpty() && intent?.action == ACTION_CANCEL) stopWhenIdle()
         return START_NOT_STICKY
@@ -101,6 +103,7 @@ class SegmentedDownloadService : Service() {
         if (jobs[id]?.isActive == true) return
         val record = store.get(id) ?: return
         if (record.status == DownloadStatus.SUCCESSFUL) return
+        cancelledDownloads.remove(id)
         jobs[id] = serviceScope.launch {
             try {
                 download(record)
@@ -109,6 +112,12 @@ class SegmentedDownloadService : Service() {
                     current.copy(status = DownloadStatus.PAUSED, bytesPerSecond = 0L)
                 }
             } catch (error: Exception) {
+                if (cancelledDownloads.contains(id)) {
+                    store.update(id) { current ->
+                        current.copy(status = DownloadStatus.PAUSED, bytesPerSecond = 0L)
+                    }
+                    return@launch
+                }
                 val failed = store.update(id) { current ->
                     current.copy(
                         status = DownloadStatus.FAILED,
@@ -121,6 +130,17 @@ class SegmentedDownloadService : Service() {
                 jobs.remove(id)
                 if (jobs.isEmpty()) stopWhenIdle()
             }
+        }
+    }
+
+    private fun cancelDownload(id: Long) {
+        synchronized(notificationLock) {
+            cancelledDownloads.add(id)
+            notificationManager.cancel(notificationId(id))
+        }
+        jobs.remove(id)?.cancel()
+        store.update(id) { record ->
+            record.copy(status = DownloadStatus.PAUSED, bytesPerSecond = 0L)
         }
     }
 
@@ -344,6 +364,7 @@ class SegmentedDownloadService : Service() {
     }
 
     private fun complete(id: Long, localUri: Uri) {
+        if (cancelledDownloads.contains(id)) return
         downloadPartsDirectory(this, id).deleteRecursively()
         val complete = store.update(id) { record ->
             record.copy(
@@ -376,6 +397,7 @@ class SegmentedDownloadService : Service() {
     }
 
     private fun reportProgress(id: Long, downloadedBytes: Long, totalBytes: Long, bytesPerSecond: Long) {
+        if (cancelledDownloads.contains(id)) return
         val updated = store.update(id) { record ->
             record.copy(
                 downloadedBytes = downloadedBytes,
@@ -425,7 +447,11 @@ class SegmentedDownloadService : Service() {
                 cancelPendingIntent(record.id),
             )
         }
-        notificationManager.notify(notificationId(record.id), builder.build())
+        synchronized(notificationLock) {
+            if (!cancelledDownloads.contains(record.id)) {
+                notificationManager.notify(notificationId(record.id), builder.build())
+            }
+        }
     }
 
     private fun ensureForeground() {
