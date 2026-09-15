@@ -135,15 +135,14 @@ class MainActivity : FragmentActivity() {
                     val navState = rememberTopLevelNavState()
 
                     val mediaStack = navState.backStacks.getValue(TopLevelDestination.MEDIA.route)
-                    val playlistStack = navState.backStacks.getValue(TopLevelDestination.PLAYLISTS.route)
                     val networkStack = navState.backStacks.getValue(TopLevelDestination.NETWORK.route)
                     val moreStack = navState.backStacks.getValue(TopLevelDestination.MORE.route)
 
                     val provider = entryProvider {
                         mediaNavGraph(context = this@MainActivity, backStack = mediaStack)
-                        playlistNavGraph(context = this@MainActivity, backStack = playlistStack)
                         networkNavGraph(context = this@MainActivity, backStack = networkStack)
                         moreNavGraph(context = this@MainActivity, backStack = moreStack)
+                        playlistNavGraph(context = this@MainActivity, backStack = moreStack)
                         settingsNavGraph(backStack = navState.currentStack)
                     }
 

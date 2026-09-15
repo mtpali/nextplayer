@@ -394,16 +394,4 @@
     <string name="screenshot_saved">اسکرین‌شات در Pictures/Player ذخیره شد</string>
     <string name="screenshot_failed">ثبت این فریم ممکن نشد.</string>
     <string name="screenshot_unsupported">اسکرین‌شات به اندروید ۸ یا جدیدتر نیاز دارد.</string>
-    <string name="about_mobile_tina">درباره موبایل تینا</string>
-    <string name="about_us">درباره ما</string>
-    <string name="follow_us_social">ما را در شبکه‌های اجتماعی دنبال کنید</string>
-    <string name="instagram_branch_one">اینستاگرام شعبه اول: کتالم</string>
-    <string name="instagram_branch_two">اینستاگرام شعبه دوم: رامسر</string>
-    <string name="instagram_third">اینستاگرام سوم</string>
-    <string name="contact_developer">ارتباط با توسعه دهنده</string>
-    <string name="store_addresses">آدرس فروشگاه</string>
-    <string name="store_address_one">شعبه اول: کتالم، جنب دبستان شهید بهشتی</string>
-    <string name="store_address_two">شعبه دوم: رامسر، ابریشم محله، جنب بانک رفاه</string>
-    <string name="player_version">Player %1$s</string>
-    <string name="open_source_licenses">مجوزهای متن‌باز</string>
 </resources>

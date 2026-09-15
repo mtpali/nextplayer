@@ -511,16 +511,4 @@
     <string name="screenshot_saved">Screenshot saved to Pictures/Player</string>
     <string name="screenshot_failed">Couldn’t capture this frame.</string>
     <string name="screenshot_unsupported">Screenshots require Android 8.0 or newer.</string>
-    <string name="about_mobile_tina">About Mobile Tina</string>
-    <string name="about_us">About us</string>
-    <string name="follow_us_social">Follow us on social media</string>
-    <string name="instagram_branch_one">Instagram · Ketalem branch</string>
-    <string name="instagram_branch_two">Instagram · Ramsar branch</string>
-    <string name="instagram_third">Third Instagram page</string>
-    <string name="contact_developer">Contact the developer</string>
-    <string name="store_addresses">Store addresses</string>
-    <string name="store_address_one">Ketalem branch: Next to Shahid Beheshti School</string>
-    <string name="store_address_two">Ramsar branch: Abrisham Mahalleh, next to Refah Bank</string>
-    <string name="player_version">Player %1$s</string>
-    <string name="open_source_licenses">Open-source licenses</string>
 </resources>

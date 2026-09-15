@@ -3,12 +3,10 @@ package dev.anilbeesetti.nextplayer.settings.screens.about
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -24,11 +23,9 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -36,9 +33,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.anilbeesetti.nextplayer.core.ui.R
 import dev.anilbeesetti.nextplayer.core.ui.components.NextTopAppBar
 import dev.anilbeesetti.nextplayer.core.ui.components.rememberTvListFocusRequester
@@ -48,23 +43,47 @@ import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
 
 @Composable
 fun AboutPreferencesScreen(viewModel: AboutPreferencesViewModel) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    AboutPreferencesScreenContent(state = state, onAction = viewModel::onAction)
+    AboutPreferencesScreenContent(onAction = viewModel::onAction)
 }
 
 @Composable
 private fun AboutPreferencesScreenContent(
-    state: AboutPreferencesUiState,
     onAction: (AboutPreferencesAction) -> Unit,
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val listFocusRequester = rememberTvListFocusRequester()
+    val buttons = listOf(
+        AboutButton(
+            title = SocialDestinations.firstLabel(),
+            destination = SocialDestinations.firstInstagram(),
+            icon = NextIcons.Camera,
+            accent = Color(0xFFE4405F),
+        ),
+        AboutButton(
+            title = SocialDestinations.secondLabel(),
+            destination = SocialDestinations.secondInstagram(),
+            icon = NextIcons.Camera,
+            accent = Color(0xFFD62976),
+        ),
+        AboutButton(
+            title = SocialDestinations.thirdLabel(),
+            destination = SocialDestinations.thirdInstagram(),
+            icon = NextIcons.Camera,
+            accent = Color(0xFF962FBF),
+        ),
+        AboutButton(
+            title = SocialDestinations.developerLabel(),
+            destination = SocialDestinations.telegram(),
+            icon = NextIcons.Send,
+            accent = Color(0xFF229ED9),
+        ),
+    )
 
     Scaffold(
         topBar = {
             NextTopAppBar(
-                title = stringResource(R.string.about_mobile_tina),
+                title = stringResource(R.string.about),
                 navigationIcon = {
                     FilledTonalIconButton(
                         onClick = { onAction(AboutPreferencesAction.NavigateUp) },
@@ -86,205 +105,77 @@ private fun AboutPreferencesScreenContent(
                 .verticalScroll(rememberScrollState())
                 .tvListFocus(listFocusRequester)
                 .padding(innerPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(horizontal = 16.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            HeroCard(appVersion = state.appVersion)
-
-            SocialButton(
-                title = stringResource(R.string.instagram_branch_one),
-                handle = SocialDestinations.firstInstagramHandle(),
-                icon = NextIcons.Camera,
-                accent = Color(0xFFE4405F),
-                onClick = {
-                    uriHandler.openUriOrShowToast(SocialDestinations.firstInstagram(), context)
-                },
-            )
-            SocialButton(
-                title = stringResource(R.string.instagram_branch_two),
-                handle = SocialDestinations.secondInstagramHandle(),
-                icon = NextIcons.Camera,
-                accent = Color(0xFFFD1D1D),
-                onClick = {
-                    uriHandler.openUriOrShowToast(SocialDestinations.secondInstagram(), context)
-                },
-            )
-            SocialButton(
-                title = stringResource(R.string.instagram_third),
-                handle = SocialDestinations.thirdInstagramHandle(),
-                icon = NextIcons.Camera,
-                accent = Color(0xFFC13584),
-                onClick = {
-                    uriHandler.openUriOrShowToast(SocialDestinations.thirdInstagram(), context)
-                },
-            )
-            SocialButton(
-                title = stringResource(R.string.contact_developer),
-                handle = SocialDestinations.telegramHandle(),
-                icon = NextIcons.Send,
-                accent = Color(0xFF229ED9),
-                onClick = {
-                    uriHandler.openUriOrShowToast(SocialDestinations.telegram(), context)
-                },
-            )
-
-            Text(
-                text = stringResource(R.string.store_addresses),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 12.dp),
-            )
-            AddressCard(stringResource(R.string.store_address_one))
-            AddressCard(stringResource(R.string.store_address_two))
-
-            Text(
-                text = stringResource(R.string.open_source_licenses),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onAction(AboutPreferencesAction.OpenLibraries) }
-                    .padding(vertical = 12.dp),
-            )
-        }
-    }
-}
-
-@Composable
-private fun HeroCard(appVersion: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
-            .background(
-                Brush.linearGradient(
-                    listOf(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        MaterialTheme.colorScheme.tertiaryContainer,
-                    ),
-                ),
-            )
-            .padding(horizontal = 24.dp, vertical = 30.dp),
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(60.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = NextIcons.Player,
-                    contentDescription = null,
-                    modifier = Modifier.size(34.dp),
+            buttons.forEach { button ->
+                SimpleAboutButton(
+                    button = button,
+                    onClick = {
+                        uriHandler.openUriOrShowToast(button.destination, context)
+                    },
                 )
             }
-            Text(
-                text = stringResource(R.string.about_us),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-            )
-            Text(
-                text = stringResource(R.string.follow_us_social),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
-            Text(
-                text = stringResource(R.string.player_version, appVersion),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
     }
 }
 
 @Composable
-private fun SocialButton(
-    title: String,
-    handle: String,
-    icon: ImageVector,
-    accent: Color,
+private fun SimpleAboutButton(
+    button: AboutButton,
     onClick: () -> Unit,
 ) {
     OutlinedCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.outlinedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(18.dp),
+                .padding(horizontal = 16.dp, vertical = 18.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Box(
                 modifier = Modifier
-                    .size(46.dp)
+                    .size(42.dp)
                     .clip(CircleShape)
-                    .background(accent.copy(alpha = 0.14f)),
+                    .background(button.accent.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    imageVector = icon,
+                    imageVector = button.icon,
                     contentDescription = null,
-                    tint = accent,
+                    tint = button.accent,
+                    modifier = Modifier.size(22.dp),
                 )
             }
-            Column(Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    text = "@$handle",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            Text(
+                text = button.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.weight(1f),
+            )
             Icon(
                 imageVector = NextIcons.ArrowForward,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp),
             )
         }
     }
 }
 
-@Composable
-private fun AddressCard(address: String) {
-    OutlinedCard(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(18.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                imageVector = NextIcons.Location,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-            )
-            Spacer(Modifier.size(14.dp))
-            Text(
-                text = address,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f),
-            )
-        }
-    }
-}
+private data class AboutButton(
+    val title: String,
+    val destination: String,
+    val icon: ImageVector,
+    val accent: Color,
+)
 
 internal fun UriHandler.openUriOrShowToast(uri: String, context: Context) {
     try {
@@ -296,6 +187,22 @@ internal fun UriHandler.openUriOrShowToast(uri: String, context: Context) {
 
 private object SocialDestinations {
     private const val KEY = 55
+
+    fun firstLabel(): String = decode(
+        126, 89, 68, 67, 86, 80, 69, 86, 90, 23, 6, 23, 13, 23, 90, 88, 85, 94, 91, 82, 25, 67, 94, 89, 86,
+    )
+
+    fun secondLabel(): String = decode(
+        126, 89, 68, 67, 86, 80, 69, 86, 90, 23, 5, 23, 13, 23, 90, 88, 85, 94, 91, 82, 25, 67, 94, 89, 86, 5,
+    )
+
+    fun thirdLabel(): String = decode(
+        126, 89, 68, 67, 86, 80, 69, 86, 90, 23, 4, 23, 13, 23, 90, 88, 85, 94, 91, 82, 25, 67, 94, 89, 86, 86,
+    )
+
+    fun developerLabel(): String = decode(
+        115, 82, 65, 82, 91, 88, 71, 82, 83, 23, 117, 78, 23, 118, 123, 126, 23, 122, 99, 103,
+    )
 
     fun firstInstagram(): String = decode(
         95, 67, 67, 71, 68, 13, 24, 24, 94, 89, 68, 67, 86, 80, 69, 86, 90,
@@ -315,11 +222,6 @@ private object SocialDestinations {
     fun telegram(): String = decode(
         95, 67, 67, 71, 68, 13, 24, 24, 67, 25, 90, 82, 24, 97, 103, 121, 14, 1, 4,
     )
-
-    fun firstInstagramHandle(): String = decode(90, 88, 85, 94, 91, 82, 25, 67, 94, 89, 86)
-    fun secondInstagramHandle(): String = decode(90, 88, 85, 94, 91, 82, 25, 67, 94, 89, 86, 5)
-    fun thirdInstagramHandle(): String = decode(90, 88, 85, 94, 91, 82, 25, 67, 94, 89, 86, 86)
-    fun telegramHandle(): String = decode(97, 103, 121, 14, 1, 4)
 
     private fun decode(vararg encoded: Int): String = buildString(encoded.size) {
         encoded.forEach { append((it xor KEY).toChar()) }
