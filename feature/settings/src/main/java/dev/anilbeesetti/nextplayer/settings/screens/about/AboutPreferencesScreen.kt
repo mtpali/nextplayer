@@ -83,7 +83,7 @@ private fun AboutPreferencesScreenContent(
     Scaffold(
         topBar = {
             NextTopAppBar(
-                title = stringResource(R.string.about),
+                title = stringResource(R.string.about_name),
                 navigationIcon = {
                     FilledTonalIconButton(
                         onClick = { onAction(AboutPreferencesAction.NavigateUp) },
