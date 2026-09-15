@@ -8,6 +8,7 @@ import android.webkit.URLUtil
 import androidx.core.net.toUri
 import java.io.File
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 
 data class ManagedDownload(
@@ -121,11 +122,20 @@ internal class DownloadStore(context: Context) {
 
     private fun readRecords(): List<PersistedDownload> {
         val value = preferences.getString(KEY_DOWNLOADS, null) ?: return emptyList()
-        return runCatching { json.decodeFromString<List<PersistedDownload>>(value) }.getOrDefault(emptyList())
+        return runCatching {
+            json.decodeFromString(
+                deserializer = ListSerializer(PersistedDownload.serializer()),
+                string = value,
+            )
+        }.getOrDefault(emptyList())
     }
 
     private fun writeRecords(records: List<PersistedDownload>) {
-        preferences.edit().putString(KEY_DOWNLOADS, json.encodeToString(records)).apply()
+        val value = json.encodeToString(
+            serializer = ListSerializer(PersistedDownload.serializer()),
+            value = records,
+        )
+        preferences.edit().putString(KEY_DOWNLOADS, value).apply()
     }
 
     private companion object {
