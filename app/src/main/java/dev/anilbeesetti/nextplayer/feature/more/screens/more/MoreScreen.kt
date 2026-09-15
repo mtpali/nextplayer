@@ -115,6 +115,18 @@ internal fun MoreScreenContent(
                 ) {
                     FilledTonalButton(
                         modifier = Modifier.weight(1f).tvFocusRing(),
+                        onClick = { onAction(MoreAction.OpenPlaylists) },
+                    ) {
+                        Icon(
+                            imageVector = NextIcons.Playlist,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                        )
+                        Spacer(modifier = Modifier.size(8.dp))
+                        Text(text = stringResource(R.string.playlists))
+                    }
+                    FilledTonalButton(
+                        modifier = Modifier.weight(1f).tvFocusRing(),
                         onClick = { onAction(MoreAction.OpenVault) },
                     ) {
                         Icon(

@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
 import dev.anilbeesetti.nextplayer.core.ui.R
+import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
 import dev.anilbeesetti.nextplayer.core.ui.extensions.copy
 import dev.anilbeesetti.nextplayer.feature.player.buttons.PlayerButton
 import dev.anilbeesetti.nextplayer.feature.player.model.labelRes
@@ -40,6 +41,7 @@ fun ControlsTopView(
     onSubtitleClick: () -> Unit = {},
     onPlaybackSpeedClick: () -> Unit = {},
     onPlaylistClick: () -> Unit = {},
+    onScreenshotClick: () -> Unit = {},
     onBackClick: () -> Unit,
 ) {
     val systemBarsPadding = WindowInsets.systemBars.union(WindowInsets.displayCutout).asPaddingValues()
@@ -75,6 +77,12 @@ fun ControlsTopView(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            PlayerButton(onClick = onScreenshotClick) {
+                Icon(
+                    imageVector = NextIcons.Camera,
+                    contentDescription = stringResource(R.string.take_screenshot),
+                )
+            }
             PlayerButton(
                 modifier = Modifier.semantics { contentDescription = decoderDescription },
                 onClick = onDecoderClick,

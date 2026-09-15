@@ -1,105 +1,97 @@
 package dev.anilbeesetti.nextplayer.settings.screens.about
 
-import android.content.ClipData
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.ClipEntry
-import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.anilbeesetti.nextplayer.core.common.extensions.appIcon
 import dev.anilbeesetti.nextplayer.core.ui.R
-import dev.anilbeesetti.nextplayer.core.ui.components.ClickablePreferenceItem
-import dev.anilbeesetti.nextplayer.core.ui.components.ListSectionTitle
 import dev.anilbeesetti.nextplayer.core.ui.components.NextTopAppBar
 import dev.anilbeesetti.nextplayer.core.ui.components.rememberTvListFocusRequester
 import dev.anilbeesetti.nextplayer.core.ui.components.tvFocusDown
 import dev.anilbeesetti.nextplayer.core.ui.components.tvListFocus
 import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
-import kotlinx.coroutines.launch
-
-private const val GITHUB_URL = "https://github.com/anilbeesetti/nextplayer"
-private const val KOFI_URL = "https://ko-fi.com/anilbeesetti"
-private const val PAYPAL_URL = "https://paypal.me/AnilBeesetti"
-private const val UPI_ID = "anilbeesetti10@oksbi"
 
 @Composable
 fun AboutPreferencesScreen(viewModel: AboutPreferencesViewModel) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    AboutPreferencesScreenContent(state = state, onAction = viewModel::onAction)
+    AboutPreferencesScreenContent(onAction = viewModel::onAction)
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun AboutPreferencesScreenContent(
-    state: AboutPreferencesUiState,
     onAction: (AboutPreferencesAction) -> Unit,
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
-    val clipboard = LocalClipboard.current
-    val scope = rememberCoroutineScope()
-
     val listFocusRequester = rememberTvListFocusRequester()
+    val buttons = listOf(
+        AboutButton(
+            title = SocialDestinations.firstLabel(),
+            destination = SocialDestinations.firstInstagram(),
+            icon = NextIcons.Camera,
+            accent = Color(0xFFE4405F),
+        ),
+        AboutButton(
+            title = SocialDestinations.secondLabel(),
+            destination = SocialDestinations.secondInstagram(),
+            icon = NextIcons.Camera,
+            accent = Color(0xFFD62976),
+        ),
+        AboutButton(
+            title = SocialDestinations.thirdLabel(),
+            destination = SocialDestinations.thirdInstagram(),
+            icon = NextIcons.Camera,
+            accent = Color(0xFF962FBF),
+        ),
+        AboutButton(
+            title = SocialDestinations.developerLabel(),
+            destination = SocialDestinations.telegram(),
+            icon = NextIcons.Send,
+            accent = Color(0xFF229ED9),
+        ),
+    )
+
     Scaffold(
         topBar = {
             NextTopAppBar(
-                title = stringResource(id = R.string.about_name),
+                title = stringResource(R.string.about_name),
                 navigationIcon = {
-                    FilledTonalIconButton(onClick = { onAction(AboutPreferencesAction.NavigateUp) }, modifier = Modifier.tvFocusDown(listFocusRequester)) {
+                    FilledTonalIconButton(
+                        onClick = { onAction(AboutPreferencesAction.NavigateUp) },
+                        modifier = Modifier.tvFocusDown(listFocusRequester),
+                    ) {
                         Icon(
                             imageVector = NextIcons.ArrowBack,
-                            contentDescription = stringResource(id = R.string.navigate_up),
+                            contentDescription = stringResource(R.string.navigate_up),
                         )
                     }
                 },
@@ -113,57 +105,15 @@ private fun AboutPreferencesScreenContent(
                 .verticalScroll(rememberScrollState())
                 .tvListFocus(listFocusRequester)
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp)
-                .padding(vertical = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            AboutApp(
-                appVersion = state.appVersion,
-                onGithubClick = {
-                    uriHandler.openUriOrShowToast(
-                        uri = GITHUB_URL,
-                        context = context,
-                    )
-                },
-                onLibrariesClick = { onAction(AboutPreferencesAction.OpenLibraries) },
-            )
-            ListSectionTitle(text = stringResource(id = R.string.donate))
-            Column(
-                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
-            ) {
-                ClickablePreferenceItem(
-                    title = stringResource(R.string.kofi),
-                    description = stringResource(R.string.support_the_developer_on, stringResource(R.string.kofi)),
-                    icon = ImageVector.vectorResource(R.drawable.ic_kofi),
+            buttons.forEach { button ->
+                SimpleAboutButton(
+                    button = button,
                     onClick = {
-                        uriHandler.openUriOrShowToast(
-                            uri = KOFI_URL,
-                            context = context,
-                        )
+                        uriHandler.openUriOrShowToast(button.destination, context)
                     },
-                    isFirstItem = true,
-                )
-                ClickablePreferenceItem(
-                    title = stringResource(R.string.paypal),
-                    description = stringResource(R.string.support_the_developer_on, stringResource(R.string.paypal)),
-                    icon = ImageVector.vectorResource(R.drawable.ic_paypal),
-                    onClick = {
-                        uriHandler.openUriOrShowToast(
-                            uri = PAYPAL_URL,
-                            context = context,
-                        )
-                    },
-                )
-                ClickablePreferenceItem(
-                    title = stringResource(R.string.upi),
-                    description = UPI_ID,
-                    icon = ImageVector.vectorResource(R.drawable.ic_upi),
-                    onClick = {
-                        scope.launch {
-                            clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("text", UPI_ID)))
-                            Toast.makeText(context, "copied to clipboard", Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    isLastItem = true,
                 )
             }
         }
@@ -171,147 +121,109 @@ private fun AboutPreferencesScreenContent(
 }
 
 @Composable
-fun AboutApp(
-    appVersion: String,
-    modifier: Modifier = Modifier,
-    onGithubClick: () -> Unit,
-    onLibrariesClick: () -> Unit,
+private fun SimpleAboutButton(
+    button: AboutButton,
+    onClick: () -> Unit,
 ) {
-    val context = LocalContext.current
-    val appIcon = remember { context.appIcon()?.asImageBitmap() }
-
-    val colorPrimary = MaterialTheme.colorScheme.primaryContainer
-    val colorTertiary = MaterialTheme.colorScheme.tertiaryContainer
-
-    val transition = rememberInfiniteTransition()
-    val fraction by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 5000),
-            repeatMode = RepeatMode.Reverse,
+    OutlinedCard(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.outlinedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ),
-    )
-    val cornerRadius = 24.dp
-
-    Column(
-        modifier = modifier
-            .padding(
-                vertical = 16.dp,
-                horizontal = 8.dp,
-            )
-            .drawWithCache {
-                val cx = size.width - size.width * fraction
-                val cy = size.height * fraction
-
-                val gradient = Brush.radialGradient(
-                    colors = listOf(colorPrimary, colorTertiary),
-                    center = Offset(cx, cy),
-                    radius = 800f,
-                )
-
-                onDrawBehind {
-                    drawRoundRect(
-                        brush = gradient,
-                        cornerRadius = CornerRadius(
-                            cornerRadius.toPx(),
-                            cornerRadius.toPx(),
-                        ),
-                    )
-                }
-            }
-            .padding(all = 24.dp)
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 18.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            appIcon?.let {
-                Image(
-                    bitmap = it,
-                    contentDescription = "App Logo",
-                    modifier = Modifier.size(48.dp).clip(CircleShape),
-                )
-            }
-            Column {
-                Text(
-                    text = stringResource(id = R.string.app_name),
-                    fontSize = 22.sp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = appVersion,
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 12.sp,
-                    )
-                    Text(
-                        text = stringResource(R.string.by, stringResource(R.string.app_developer)),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Button(
-                onClick = onLibrariesClick,
-                colors = ButtonDefaults.buttonColors(
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = .12f),
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = .12f),
-                ),
-                shape = RoundedCornerShape(8.dp),
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-                    .weight(1f),
-            ) {
-                Text(text = stringResource(R.string.libraries))
-            }
-            Button(
-                onClick = onGithubClick,
-                colors = ButtonDefaults.buttonColors(
-                    contentColor = MaterialTheme.colorScheme.onTertiary,
-                    disabledContentColor = MaterialTheme.colorScheme.onTertiary.copy(alpha = .12f),
-                    containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.8f),
-                    disabledContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = .12f),
-                ),
-                shape = RoundedCornerShape(8.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .height(52.dp),
+                    .size(42.dp)
+                    .clip(CircleShape)
+                    .background(button.accent.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_github),
+                    imageVector = button.icon,
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp),
+                    tint = button.accent,
+                    modifier = Modifier.size(22.dp),
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = stringResource(R.string.github))
             }
+            Text(
+                text = button.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.weight(1f),
+            )
+            Icon(
+                imageVector = NextIcons.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp),
+            )
         }
     }
 }
 
+private data class AboutButton(
+    val title: String,
+    val destination: String,
+    val icon: ImageVector,
+    val accent: Color,
+)
+
 internal fun UriHandler.openUriOrShowToast(uri: String, context: Context) {
     try {
-        openUri(uri = uri)
-    } catch (e: Exception) {
+        openUri(uri)
+    } catch (_: Exception) {
         Toast.makeText(context, context.getString(R.string.error_opening_link), Toast.LENGTH_SHORT).show()
+    }
+}
+
+private object SocialDestinations {
+    private const val KEY = 55
+
+    fun firstLabel(): String = decode(
+        126, 89, 68, 67, 86, 80, 69, 86, 90, 23, 6, 23, 13, 23, 90, 88, 85, 94, 91, 82, 25, 67, 94, 89, 86,
+    )
+
+    fun secondLabel(): String = decode(
+        126, 89, 68, 67, 86, 80, 69, 86, 90, 23, 5, 23, 13, 23, 90, 88, 85, 94, 91, 82, 25, 67, 94, 89, 86, 5,
+    )
+
+    fun thirdLabel(): String = decode(
+        126, 89, 68, 67, 86, 80, 69, 86, 90, 23, 4, 23, 13, 23, 90, 88, 85, 94, 91, 82, 25, 67, 94, 89, 86, 86,
+    )
+
+    fun developerLabel(): String = decode(
+        115, 82, 65, 82, 91, 88, 71, 82, 83, 23, 117, 78, 23, 118, 123, 126, 23, 122, 99, 103,
+    )
+
+    fun firstInstagram(): String = decode(
+        95, 67, 67, 71, 68, 13, 24, 24, 94, 89, 68, 67, 86, 80, 69, 86, 90,
+        25, 84, 88, 90, 24, 90, 88, 85, 94, 91, 82, 25, 67, 94, 89, 86,
+    )
+
+    fun secondInstagram(): String = decode(
+        95, 67, 67, 71, 68, 13, 24, 24, 94, 89, 68, 67, 86, 80, 69, 86, 90,
+        25, 84, 88, 90, 24, 90, 88, 85, 94, 91, 82, 25, 67, 94, 89, 86, 5,
+    )
+
+    fun thirdInstagram(): String = decode(
+        95, 67, 67, 71, 68, 13, 24, 24, 94, 89, 68, 67, 86, 80, 69, 86, 90,
+        25, 84, 88, 90, 24, 90, 88, 85, 94, 91, 82, 25, 67, 94, 89, 86, 86,
+    )
+
+    fun telegram(): String = decode(
+        95, 67, 67, 71, 68, 13, 24, 24, 67, 25, 90, 82, 24, 97, 103, 121, 14, 1, 4,
+    )
+
+    private fun decode(vararg encoded: Int): String = buildString(encoded.size) {
+        encoded.forEach { append((it xor KEY).toChar()) }
     }
 }

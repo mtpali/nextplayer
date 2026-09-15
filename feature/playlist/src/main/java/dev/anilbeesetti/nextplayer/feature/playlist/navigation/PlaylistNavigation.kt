@@ -18,6 +18,10 @@ data object PlaylistListRoute : NavKey
 @Serializable
 data class PlaylistDetailRoute(val playlistId: Long) : NavKey
 
+fun NavBackStack<NavKey>.navigateToPlaylists() {
+    add(PlaylistListRoute)
+}
+
 fun NavBackStack<NavKey>.navigateToPlaylistDetail(playlistId: Long) {
     add(PlaylistDetailRoute(playlistId))
 }

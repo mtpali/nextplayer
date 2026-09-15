@@ -1,5 +1,6 @@
 package dev.anilbeesetti.nextplayer.feature.player
 
+import android.graphics.Rect
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
@@ -41,6 +42,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -112,6 +114,7 @@ import dev.anilbeesetti.nextplayer.feature.player.ui.controls.ControlsTopView
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 val LocalControlsVisibilityState = compositionLocalOf<ControlsVisibilityState?> { null }
@@ -213,6 +216,8 @@ fun MediaPlayerScreen(
     var isPlayPauseFocused by remember { mutableStateOf(false) }
     var isUnlockFocused by remember { mutableStateOf(false) }
     val seekIncrementMs = playerPreferences.seekIncrement.seconds.inWholeMilliseconds
+    val screenshotScope = rememberCoroutineScope()
+    var videoBounds by remember { mutableStateOf<Rect?>(null) }
 
     if (isTv) {
         LaunchedEffect(controlsVisibilityState.controlsVisible, controlsVisibilityState.controlsLocked, overlayView) {
@@ -293,6 +298,7 @@ fun MediaPlayerScreen(
                         textBold = playerPreferences.subtitleTextBold,
                         applyEmbeddedStyles = playerPreferences.applyEmbeddedStyles,
                     ),
+                    onVideoBoundsChanged = { videoBounds = it },
                 )
 
                 AnimatedVisibility(
@@ -397,6 +403,20 @@ fun MediaPlayerScreen(
                                     onPlaylistClick = {
                                         controlsVisibilityState.hideControls()
                                         overlayView = OverlayView.PLAYLIST
+                                    },
+                                    onScreenshotClick = {
+                                        videoBounds?.let { bounds ->
+                                            controlsVisibilityState.hideControls()
+                                            screenshotScope.launch {
+                                                delay(150)
+                                                val message = when (captureVideoScreenshot(context, bounds)) {
+                                                    is ScreenshotResult.Saved -> coreUiR.string.screenshot_saved
+                                                    ScreenshotResult.Unsupported -> coreUiR.string.screenshot_unsupported
+                                                    ScreenshotResult.Failed -> coreUiR.string.screenshot_failed
+                                                }
+                                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
                                     },
                                     onBackClick = onBackClick,
                                 )

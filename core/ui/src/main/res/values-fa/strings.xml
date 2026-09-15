@@ -19,7 +19,7 @@
     <string name="duration">مدت</string>
     <string name="largest">بزرگ‌ترین</string>
     <string name="dark_theme">حالت تاریک</string>
-    <string name="permission_settings">برنامه Next Player برای دسترسی و پخش رسانه به مجوز «%1$s» نیاز دارد. بدون آن، دسترسی به رسانه و پخش کار نخواهد کرد. برای بهره‌مندی کامل از برنامه، از تنظیمات اجازه دهید زیرا مجوز برای همیشه رد شده است.</string>
+    <string name="permission_settings">برنامه Player برای دسترسی و پخش رسانه به مجوز «%1$s» نیاز دارد. بدون آن، دسترسی به رسانه و پخش کار نخواهد کرد. برای بهره‌مندی کامل از برنامه، از تنظیمات اجازه دهید زیرا مجوز برای همیشه رد شده است.</string>
     <string name="resume_description">انتخاب کنید که آیا ویدیوهای پخش شده از نقطه‌ای که متوقف شده است از سر گرفته شود یا خیر</string>
     <string name="player_name">پخش کننده</string>
     <string name="remember_brightness_level_description">سطح روشنایی بین پخش‌ها را به خاطر بسپار</string>
@@ -41,7 +41,7 @@
     <string name="open_settings">باز کردن تنظیمات</string>
     <string name="navigate_up">پیمایش به بالا</string>
     <string name="permission_not_granted">مجوز اعطا نشده است</string>
-    <string name="permission_info">برنامه Next Player برای دسترسی و پخش رسانه به مجوز «%1$s» نیاز دارد. بدون آن، دسترسی به رسانه و پخش کار نخواهد کرد. برای بهره‌مندی کامل از برنامه، اجازه دهید.</string>
+    <string name="permission_info">برنامه Player برای دسترسی و پخش رسانه به مجوز «%1$s» نیاز دارد. بدون آن، دسترسی به رسانه و پخش کار نخواهد کرد. برای بهره‌مندی کامل از برنامه، اجازه دهید.</string>
     <string name="permission_request">درخواست مجوز</string>
     <string name="player_controls_exit">پیمایش به بالا</string>
     <string name="player_controls_next">پخش بعدی</string>
@@ -59,7 +59,7 @@
     <string name="settings">تنظیمات</string>
     <string name="sort">چیدمان</string>
     <string name="title">عنوان</string>
-    <string name="title_activity_player">فعالیت‌های Next Player</string>
+    <string name="title_activity_player">فعالیت‌های Player</string>
     <string name="unknown_error">خطایی ناشناخته اتفاق افتاده است</string>
     <string name="interface_name">رابط کاربری</string>
     <string name="a_z">الف-ی</string>
@@ -361,4 +361,37 @@
         <item quantity="other">%1$d ویدیو منتقل شد اما نمیتوان اصل‌ها را برداشت</item>
     </plurals>
     <string name="cannot_move_to_same_folder">نمی‌توان به همان پوشه منتقل کرد</string>
+    <string name="online_playback">پخش آنلاین</string>
+    <string name="online_playback_description">لینک مستقیم ویدیو، HLS، DASH یا RTSP را وارد و فوری پخش کنید.</string>
+    <string name="download_manager">مدیریت دانلود</string>
+    <string name="download_manager_description">دانلود سریع در پس‌زمینه همراه با نمایش پیشرفت و اعلان سیستم.</string>
+    <string name="download">دانلود</string>
+    <string name="downloads">دانلودها</string>
+    <string name="paste">چسباندن</string>
+    <string name="open">باز کردن</string>
+    <string name="unknown_file">فایل ناشناس</string>
+    <string name="no_downloads">هنوز دانلودی وجود ندارد</string>
+    <string name="invalid_stream_url">یک لینک معتبر HTTP، HTTPS یا RTSP وارد کنید.</string>
+    <string name="invalid_download_url">یک لینک دانلود معتبر HTTP یا HTTPS وارد کنید.</string>
+    <string name="download_started">دانلود شروع شد</string>
+    <string name="download_failed">دانلود ناموفق بود</string>
+    <string name="cannot_open_download">برنامه‌ای برای باز کردن این فایل پیدا نشد.</string>
+    <string name="download_pending">در انتظار</string>
+    <string name="download_running">در حال دانلود</string>
+    <string name="download_paused">توسط سیستم متوقف شده</string>
+    <string name="download_complete">تکمیل شده</string>
+    <string name="download_progress">%1$d٪ دانلود شده</string>
+    <string name="download_size_progress">%1$s از %2$s</string>
+    <string name="download_remaining">%1$s باقی‌مانده</string>
+    <string name="download_speed">%1$s/ثانیه</string>
+    <string name="download_speed_calculating">در حال محاسبه سرعت…</string>
+    <string name="download_threads">%1$d اتصال هم‌زمان</string>
+    <string name="remove_download">دانلود حذف شود؟</string>
+    <string name="remove_download_confirmation">«%1$s» و فایل دانلودشده حذف می‌شوند.</string>
+    <string name="download_with_player">دانلود با Player</string>
+    <string name="download_confirmation">«%1$s» در پوشه Player دانلود شود؟</string>
+    <string name="take_screenshot">گرفتن اسکرین‌شات</string>
+    <string name="screenshot_saved">اسکرین‌شات در Pictures/Player ذخیره شد</string>
+    <string name="screenshot_failed">ثبت این فریم ممکن نشد.</string>
+    <string name="screenshot_unsupported">اسکرین‌شات به اندروید ۸ یا جدیدتر نیاز دارد.</string>
 </resources>

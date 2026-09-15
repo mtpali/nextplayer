@@ -6,11 +6,9 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import dev.anilbeesetti.nextplayer.core.database.dao.HiddenVideoDao
 import dev.anilbeesetti.nextplayer.core.database.dao.MediumStateDao
-import dev.anilbeesetti.nextplayer.core.database.dao.NetworkConnectionDao
 import dev.anilbeesetti.nextplayer.core.database.dao.PlaylistDao
 import dev.anilbeesetti.nextplayer.core.database.entities.HiddenVideoEntity
 import dev.anilbeesetti.nextplayer.core.database.entities.MediumStateEntity
-import dev.anilbeesetti.nextplayer.core.database.entities.NetworkConnectionEntity
 import dev.anilbeesetti.nextplayer.core.database.entities.PlaylistEntity
 import dev.anilbeesetti.nextplayer.core.database.entities.PlaylistItemEntity
 
@@ -18,11 +16,10 @@ import dev.anilbeesetti.nextplayer.core.database.entities.PlaylistItemEntity
     entities = [
         MediumStateEntity::class,
         HiddenVideoEntity::class,
-        NetworkConnectionEntity::class,
         PlaylistEntity::class,
         PlaylistItemEntity::class,
     ],
-    version = 11,
+    version = 12,
     exportSchema = true,
 )
 abstract class MediaDatabase : RoomDatabase() {
@@ -30,8 +27,6 @@ abstract class MediaDatabase : RoomDatabase() {
     abstract fun mediumStateDao(): MediumStateDao
 
     abstract fun hiddenVideoDao(): HiddenVideoDao
-
-    abstract fun networkConnectionDao(): NetworkConnectionDao
 
     abstract fun playlistDao(): PlaylistDao
 
@@ -223,24 +218,7 @@ abstract class MediaDatabase : RoomDatabase() {
 
         val MIGRATION_6_7 = object : Migration(6, 7) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                // Column definitions (order, types, nullability) must match the schema Room
-                // generates from NetworkConnectionEntity exactly, or migration validation fails.
-                db.execSQL(
-                    """
-                    CREATE TABLE IF NOT EXISTS `network_connection` (
-                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                        `name` TEXT NOT NULL,
-                        `protocol` TEXT NOT NULL,
-                        `host` TEXT NOT NULL,
-                        `port` INTEGER,
-                        `path` TEXT NOT NULL,
-                        `username` TEXT NOT NULL,
-                        `password` TEXT NOT NULL,
-                        `use_https` INTEGER NOT NULL,
-                        `created_at` INTEGER NOT NULL
-                    )
-                    """,
-                )
+                // Retained as a no-op so databases from version 6 can still upgrade.
             }
         }
 
@@ -285,22 +263,7 @@ abstract class MediaDatabase : RoomDatabase() {
 
         val MIGRATION_8_9 = object : Migration(8, 9) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL(
-                    "ALTER TABLE `network_connection` " +
-                        "ADD COLUMN `authentication` TEXT NOT NULL DEFAULT 'PASSWORD'",
-                )
-                db.execSQL(
-                    "ALTER TABLE `network_connection` " +
-                        "ADD COLUMN `private_key_file_name` TEXT NOT NULL DEFAULT ''",
-                )
-                db.execSQL(
-                    "ALTER TABLE `network_connection` " +
-                        "ADD COLUMN `private_key_passphrase` TEXT NOT NULL DEFAULT ''",
-                )
-                db.execSQL(
-                    "ALTER TABLE `network_connection` " +
-                        "ADD COLUMN `host_key_fingerprint` TEXT NOT NULL DEFAULT ''",
-                )
+                // Retained as a no-op so databases from version 8 can still upgrade.
             }
         }
 
@@ -321,6 +284,12 @@ abstract class MediaDatabase : RoomDatabase() {
         val MIGRATION_10_11 = object : Migration(10, 11) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE `media_state` ADD COLUMN `duration` INTEGER")
+            }
+        }
+
+        val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("DROP TABLE IF EXISTS `network_connection`")
             }
         }
     }

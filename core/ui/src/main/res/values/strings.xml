@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Next Player</string>
+    <string name="app_name" translatable="false">Player</string>
     <string name="about_description">Version, support, credits</string>
     <string name="about_name">About</string>
     <string name="appearance_description">Adjust the app to your liking</string>
@@ -24,10 +24,10 @@
     <string name="navigate_up">Navigate up</string>
     <string name="no_videos_found">No videos found</string>
     <string name="open_settings">Open Settings</string>
-    <string name="permission_info">The Next Player app needs \"%1$s\" permission to access and play media. Without it, media access and playback won\'t work. To use the app fully, grant the permission.</string>
+    <string name="permission_info">The Player app needs \"%1$s\" permission to access and play media. Without it, media access and playback won\'t work. To use the app fully, grant the permission.</string>
     <string name="permission_not_granted">Permission Not Granted</string>
     <string name="permission_request">Permission Request</string>
-    <string name="permission_settings">The Next Player app needs \"%1$s\" permission to access and play media. Without it, media access and playback won\'t work. To use the app fully, grant the permission from settings since it was permanently denied.</string>
+    <string name="permission_settings">The Player app needs \"%1$s\" permission to access and play media. Without it, media access and playback won\'t work. To use the app fully, grant the permission from settings since it was permanently denied.</string>
     <string name="player_controls_exit">Navigate up</string>
     <string name="player_controls_next">Player next</string>
     <string name="player_controls_play_pause">Player play pause</string>
@@ -57,7 +57,7 @@
     <string name="size">Size</string>
     <string name="sort">Sort</string>
     <string name="title">Title</string>
-    <string name="title_activity_player">Next Player Activity</string>
+    <string name="title_activity_player">Player Activity</string>
     <string name="unknown_error">An unknown error has occurred</string>
     <string name="playback">Playback</string>
     <string name="interface_name">Interface</string>
@@ -377,50 +377,12 @@
     <!-- Network -->
     <string name="home">Home</string>
     <string name="network">Network</string>
-    <string name="add_connection">Add connection</string>
-    <string name="edit_connection">Edit connection</string>
-    <string name="delete_connection">Delete connection</string>
-    <string name="delete_connection_confirmation">Remove \"%1$s\"?</string>
-    <string name="connection_name">Name</string>
-    <string name="protocol">Protocol</string>
-    <string name="ftp_sftp">FTP/SFTP</string>
-    <string name="use_sftp">Use SFTP</string>
-    <string name="host">Host</string>
     <string name="port">Port</string>
-    <string name="port_hint">Port (default %1$d)</string>
-    <string name="path_share">Path / Share name</string>
-    <string name="username">Username</string>
-    <string name="authentication">Authentication</string>
     <string name="password">Password</string>
-    <string name="ssh_key">SSH key</string>
-    <string name="choose_private_key">Choose private key</string>
-    <string name="replace_private_key">Replace private key</string>
-    <string name="remove_private_key">Remove private key</string>
-    <string name="private_key_stored">Private key stored</string>
-    <string name="selected_private_key">Selected key: %1$s</string>
-    <string name="private_key_passphrase">Private key passphrase (optional)</string>
-    <string name="confirm_ssh_host_key">Confirm SSH host key</string>
-    <string name="confirm_ssh_host_key_description">Compare this fingerprint with your server before trusting it.</string>
-    <string name="ssh_host_key_algorithm">Algorithm: %1$s</string>
-    <string name="ssh_host_key_fingerprint">Fingerprint: %1$s</string>
-    <string name="ssh_host_key_trusted_fingerprint">Trusted fingerprint: %1$s</string>
-    <string name="ssh_host_key_presented_fingerprint">Presented fingerprint: %1$s</string>
-    <string name="trust">Trust</string>
-    <string name="reject">Reject</string>
     <string name="private_key_missing">The private key is missing. Choose it again.</string>
     <string name="private_key_malformed">The private key format isn\'t supported or the file is malformed.</string>
     <string name="private_key_wrong_passphrase">The private key passphrase is incorrect or missing.</string>
     <string name="authentication_rejected">Authentication was rejected. Check your credentials and try again.</string>
-    <string name="host_key_mismatch">The SSH host key doesn\'t match the trusted fingerprint.</string>
-    <string name="sftp_root_inaccessible">The SFTP root path is missing or inaccessible.</string>
-    <string name="use_https">Use HTTPS</string>
-    <string name="test_and_save">Test &amp; Save</string>
-    <string name="connecting">Connecting…</string>
-    <string name="connection_failed">Couldn\'t connect. Check the details and try again.</string>
-    <string name="no_connections_title">No connections yet</string>
-    <string name="no_connections_description">Add an SMB, FTP, SFTP or WebDAV connection to browse and play videos from your network.</string>
-    <string name="empty_folder">This folder is empty</string>
-    <string name="failed_to_load_folder">Couldn\'t load this location</string>
     <string name="retry">Retry</string>
     <string name="edit">Edit</string>
 
@@ -516,4 +478,37 @@
     <string name="decoder_mode_auto">Auto</string>
     <string name="settings_description">App preferences</string>
     <string name="more">More</string>
+    <string name="online_playback">Online playback</string>
+    <string name="online_playback_description">Paste a direct video, HLS, DASH, or RTSP link and play it instantly.</string>
+    <string name="download_manager">Download manager</string>
+    <string name="download_manager_description">Fast, background downloads with progress and system notifications.</string>
+    <string name="download">Download</string>
+    <string name="downloads">Downloads</string>
+    <string name="paste">Paste</string>
+    <string name="open">Open</string>
+    <string name="unknown_file">Unknown file</string>
+    <string name="no_downloads">No downloads yet</string>
+    <string name="invalid_stream_url">Enter a valid HTTP, HTTPS, or RTSP link.</string>
+    <string name="invalid_download_url">Enter a valid HTTP or HTTPS download link.</string>
+    <string name="download_started">Download started</string>
+    <string name="download_failed">Download failed</string>
+    <string name="cannot_open_download">No app can open this file.</string>
+    <string name="download_pending">Waiting</string>
+    <string name="download_running">Downloading</string>
+    <string name="download_paused">Paused by the system</string>
+    <string name="download_complete">Complete</string>
+    <string name="download_progress">%1$d%% downloaded</string>
+    <string name="download_size_progress">%1$s / %2$s</string>
+    <string name="download_remaining">%1$s remaining</string>
+    <string name="download_speed">%1$s/s</string>
+    <string name="download_speed_calculating">Calculating speed…</string>
+    <string name="download_threads">%1$d connections</string>
+    <string name="remove_download">Remove download?</string>
+    <string name="remove_download_confirmation">This removes “%1$s” and its downloaded file.</string>
+    <string name="download_with_player">Download with Player</string>
+    <string name="download_confirmation">Download “%1$s” to the Player folder?</string>
+    <string name="take_screenshot">Take screenshot</string>
+    <string name="screenshot_saved">Screenshot saved to Pictures/Player</string>
+    <string name="screenshot_failed">Couldn’t capture this frame.</string>
+    <string name="screenshot_unsupported">Screenshots require Android 8.0 or newer.</string>
 </resources>
