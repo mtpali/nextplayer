@@ -40,8 +40,8 @@ class PlayerApi(val activity: PlayerActivity) {
 
     fun getPlaybackQueue(): List<String> {
         if (extras == null) return emptyList()
-        if (!extras.containsKey(API_PLAYLIST)) return emptyList()
-        val queue = extras.getParcelableUriArray(API_PLAYLIST) ?: return emptyList()
+        if (!extras.containsKey(API_VIDEO_LIST)) return emptyList()
+        val queue = extras.getParcelableUriArray(API_VIDEO_LIST) ?: return emptyList()
         return queue.map { (it as Uri).toString() }
     }
 
@@ -66,7 +66,7 @@ class PlayerApi(val activity: PlayerActivity) {
         const val API_SUBS = "subs"
         const val API_SUBS_ENABLE = "subs.enable"
         const val API_SUBS_NAME = "subs.name"
-        const val API_PLAYLIST = "video_list"
+        const val API_VIDEO_LIST = "video_list"
 
         const val API_RESULT_INTENT = "com.mxtech.intent.result.VIEW"
 

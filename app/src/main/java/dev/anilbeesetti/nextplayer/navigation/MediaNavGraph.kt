@@ -47,7 +47,7 @@ private fun Context.startPlayback(uri: Uri, queue: List<Uri>?) {
     val intent = Intent(this, PlayerActivity::class.java).apply {
         action = Intent.ACTION_VIEW
         data = uri
-        queue?.let { putParcelableArrayListExtra(PlayerApi.API_PLAYLIST, ArrayList(it)) }
+        queue?.let { putParcelableArrayListExtra(PlayerApi.API_VIDEO_LIST, ArrayList(it)) }
     }
     startActivity(intent)
 }

@@ -57,8 +57,8 @@ val LocalUseMaterialYouControls = compositionLocalOf { false }
 internal fun shouldResumeExistingPlayback(
     returningFromBackground: Boolean,
     isRequestedUriCurrent: Boolean,
-    hasExplicitPlaylist: Boolean,
-): Boolean = returningFromBackground || (isRequestedUriCurrent && !hasExplicitPlaylist)
+    hasExplicitQueue: Boolean,
+): Boolean = returningFromBackground || (isRequestedUriCurrent && !hasExplicitQueue)
 
 @SuppressLint("UnsafeOptInUsageError")
 @AndroidEntryPoint
@@ -212,12 +212,12 @@ class PlayerActivity : ComponentActivity() {
 
         val returningFromBackground = !isIntentNew && mediaController?.currentMediaItem != null
         val isNewUriTheCurrentMediaItem = mediaController?.currentMediaItem?.localConfiguration?.uri.toString() == uri.toString()
-        val hasExplicitPlaylist = intent.hasExtra(PlayerApi.API_PLAYLIST)
+        val hasExplicitQueue = intent.hasExtra(PlayerApi.API_VIDEO_LIST)
 
         if (shouldResumeExistingPlayback(
                 returningFromBackground = returningFromBackground,
                 isRequestedUriCurrent = isNewUriTheCurrentMediaItem,
-                hasExplicitPlaylist = hasExplicitPlaylist,
+                hasExplicitQueue = hasExplicitQueue,
             )
         ) {
             mediaController?.prepare()
