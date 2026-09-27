@@ -533,16 +533,18 @@ private data class ProbeResponse(
 internal fun sanitizeFileName(name: String): String =
     name.replace(Regex("[\\/:*?\"<>|]"), "_").trim().ifBlank { "download" }
 
-private fun uniqueFile(directory: File, name: String): File {
-    val direct = File(directory, name)
-    if (!direct.exists()) return direct
+internal fun uniqueFile(directory: File, name: String): File {
     val extension = name.substringAfterLast('.', missingDelimiterValue = "")
     val base = if (extension.isBlank()) name else name.removeSuffix(".$extension")
-    var index = 1
+    var index = 0
     while (true) {
-        val candidateName = if (extension.isBlank()) "$base ($index)" else "$base ($index).$extension"
+        val candidateName = when {
+            index == 0 -> name
+            extension.isBlank() -> "$base ($index)"
+            else -> "$base ($index).$extension"
+        }
         val candidate = File(directory, candidateName)
-        if (!candidate.exists()) return candidate
+        if (candidate.createNewFile()) return candidate
         index++
     }
 }
