@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.anilbeesetti.nextplayer.core.data.repository.MediaRepository
 import dev.anilbeesetti.nextplayer.core.data.repository.PreferencesRepository
-import dev.anilbeesetti.nextplayer.core.domain.GetSortedPlaylistUseCase
+import dev.anilbeesetti.nextplayer.core.domain.GetPlaybackQueueUseCase
 import dev.anilbeesetti.nextplayer.core.model.LoopMode
 import dev.anilbeesetti.nextplayer.core.model.PlayerPreferences
 import dev.anilbeesetti.nextplayer.core.model.Video
@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 class PlayerViewModel @Inject constructor(
     private val mediaRepository: MediaRepository,
     private val preferencesRepository: PreferencesRepository,
-    private val getSortedPlaylistUseCase: GetSortedPlaylistUseCase,
+    private val getPlaybackQueueUseCase: GetPlaybackQueueUseCase,
 ) : ViewModel() {
 
     var playWhenReady: Boolean = true
@@ -44,8 +44,8 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    suspend fun getPlaylistFromUri(uri: Uri): List<Video> {
-        return getSortedPlaylistUseCase.invoke(uri)
+    suspend fun getPlaybackQueueFromUri(uri: Uri): List<Video> {
+        return getPlaybackQueueUseCase.invoke(uri)
     }
 
     fun updateVideoZoom(uri: String, zoom: Float) {

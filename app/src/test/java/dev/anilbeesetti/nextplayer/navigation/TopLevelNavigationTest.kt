@@ -3,8 +3,8 @@ package dev.anilbeesetti.nextplayer.navigation
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import dev.anilbeesetti.nextplayer.feature.playlist.navigation.PlaylistDetailRoute
-import dev.anilbeesetti.nextplayer.feature.playlist.navigation.PlaylistListRoute
+import dev.anilbeesetti.nextplayer.settings.navigation.SettingsRoute
+import dev.anilbeesetti.nextplayer.settings.navigation.SubtitlePreferencesRoute
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -23,7 +23,7 @@ class TopLevelNavigationTest {
     }
 
     @Test
-    fun switchingTabsPreservesPlaylistStackNestedUnderMore() {
+    fun switchingTabsPreservesSettingsStackNestedUnderMore() {
         val stacks = TopLevelDestination.entries.associate { destination ->
             destination.route to NavBackStack<NavKey>(destination.route)
         }
@@ -35,13 +35,13 @@ class TopLevelNavigationTest {
         val moreStack = stacks.getValue(TopLevelDestination.MORE.route)
 
         state.switchTo(TopLevelDestination.MORE.route)
-        moreStack += PlaylistListRoute
-        moreStack += PlaylistDetailRoute(7)
+        moreStack += SettingsRoute
+        moreStack += SubtitlePreferencesRoute
         state.switchTo(TopLevelDestination.MEDIA.route)
         state.switchTo(TopLevelDestination.MORE.route)
 
         assertEquals(
-            listOf(TopLevelDestination.MORE.route, PlaylistListRoute, PlaylistDetailRoute(7)),
+            listOf(TopLevelDestination.MORE.route, SettingsRoute, SubtitlePreferencesRoute),
             state.currentStack,
         )
     }

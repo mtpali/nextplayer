@@ -15,7 +15,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
-class GetSortedPlaylistUseCase @Inject constructor(
+class GetPlaybackQueueUseCase @Inject constructor(
     private val getSortedVideosUseCase: GetSortedVideosUseCase,
     private val preferencesRepository: PreferencesRepository,
     @ApplicationContext private val context: Context,
@@ -27,7 +27,7 @@ class GetSortedPlaylistUseCase @Inject constructor(
         val parent = File(path).parent ?: return@withContext emptyList()
         val preferences = preferencesRepository.applicationPreferences.first()
 
-        // The playlist must match the order of the list the video was launched from.
+        // The playback queue matches the order of the list the video was launched from.
         when (preferences.mediaViewMode) {
             MediaViewMode.FOLDER_TREE -> {
                 // Tree mode: the folder and its subfolders.

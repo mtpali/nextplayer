@@ -53,21 +53,17 @@ class MoreViewModel @AssistedInject constructor(
     override fun onAction(action: MoreAction) {
         when (action) {
             is MoreAction.OpenHistory -> output.openHistory()
-            is MoreAction.OpenPlaylists -> output.openPlaylists()
             is MoreAction.PlayVideo -> output.playVideo(action.uri)
             is MoreAction.OpenSettings -> output.openSettings()
             is MoreAction.OpenTrash -> output.openTrash()
-            is MoreAction.OpenVault -> output.openVault()
         }
     }
 
     data class Output(
         val openHistory: () -> Unit,
-        val openPlaylists: () -> Unit,
         val playVideo: (String) -> Unit,
         val openSettings: () -> Unit,
         val openTrash: () -> Unit,
-        val openVault: () -> Unit,
     )
 }
 
@@ -78,9 +74,7 @@ data class MoreUiState(
 
 sealed interface MoreAction {
     data object OpenHistory : MoreAction
-    data object OpenPlaylists : MoreAction
     data class PlayVideo(val uri: String) : MoreAction
     data object OpenSettings : MoreAction
     data object OpenTrash : MoreAction
-    data object OpenVault : MoreAction
 }

@@ -6,20 +6,15 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import dev.anilbeesetti.nextplayer.core.database.dao.HiddenVideoDao
 import dev.anilbeesetti.nextplayer.core.database.dao.MediumStateDao
-import dev.anilbeesetti.nextplayer.core.database.dao.PlaylistDao
 import dev.anilbeesetti.nextplayer.core.database.entities.HiddenVideoEntity
 import dev.anilbeesetti.nextplayer.core.database.entities.MediumStateEntity
-import dev.anilbeesetti.nextplayer.core.database.entities.PlaylistEntity
-import dev.anilbeesetti.nextplayer.core.database.entities.PlaylistItemEntity
 
 @Database(
     entities = [
         MediumStateEntity::class,
         HiddenVideoEntity::class,
-        PlaylistEntity::class,
-        PlaylistItemEntity::class,
     ],
-    version = 12,
+    version = 13,
     exportSchema = true,
 )
 abstract class MediaDatabase : RoomDatabase() {
@@ -28,7 +23,6 @@ abstract class MediaDatabase : RoomDatabase() {
 
     abstract fun hiddenVideoDao(): HiddenVideoDao
 
-    abstract fun playlistDao(): PlaylistDao
 
     companion object {
         const val DATABASE_NAME = "media_db"
@@ -290,6 +284,13 @@ abstract class MediaDatabase : RoomDatabase() {
         val MIGRATION_11_12 = object : Migration(11, 12) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("DROP TABLE IF EXISTS `network_connection`")
+            }
+        }
+
+        val MIGRATION_12_13 = object : Migration(12, 13) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("DROP TABLE IF EXISTS `playlist_item`")
+                db.execSQL("DROP TABLE IF EXISTS `playlist`")
             }
         }
     }

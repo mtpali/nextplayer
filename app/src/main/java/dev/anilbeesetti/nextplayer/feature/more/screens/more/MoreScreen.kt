@@ -1,13 +1,10 @@
 package dev.anilbeesetti.nextplayer.feature.more.screens.more
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -78,9 +75,6 @@ internal fun MoreScreenContent(
     onAction: (MoreAction) -> Unit,
 ) {
     BindTopLevelFab(TopLevelFabKey.MORE, NextIcons.Settings) { onAction(MoreAction.OpenSettings) }
-    val filePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { onAction(MoreAction.PlayVideo(it.toString())) }
-    }
 
     Scaffold(
         topBar = {
@@ -107,62 +101,18 @@ internal fun MoreScreenContent(
                     .padding(top = 8.dp, bottom = scaffoldPadding.calculateBottomPadding() + LocalNavigationBottomPadding.current + 96.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    maxItemsInEachRow = 2,
-                ) {
+                if (MediaOperationsService.supportsTrash()) {
                     FilledTonalButton(
-                        modifier = Modifier.weight(1f).tvFocusRing(),
-                        onClick = { onAction(MoreAction.OpenPlaylists) },
+                        modifier = Modifier.fillMaxWidth().tvFocusRing(),
+                        onClick = { onAction(MoreAction.OpenTrash) },
                     ) {
                         Icon(
-                            imageVector = NextIcons.Playlist,
+                            imageVector = NextIcons.Delete,
                             contentDescription = null,
                             modifier = Modifier.size(20.dp),
                         )
                         Spacer(modifier = Modifier.size(8.dp))
-                        Text(text = stringResource(R.string.playlists))
-                    }
-                    FilledTonalButton(
-                        modifier = Modifier.weight(1f).tvFocusRing(),
-                        onClick = { onAction(MoreAction.OpenVault) },
-                    ) {
-                        Icon(
-                            imageVector = NextIcons.Lock,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                        )
-                        Spacer(modifier = Modifier.size(8.dp))
-                        Text(text = stringResource(R.string.vault))
-                    }
-                    FilledTonalButton(
-                        modifier = Modifier.weight(1f).tvFocusRing(),
-                        onClick = { filePicker.launch("video/*") },
-                    ) {
-                        Icon(
-                            imageVector = NextIcons.FileOpen,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                        )
-                        Spacer(modifier = Modifier.size(8.dp))
-                        Text(text = stringResource(R.string.pick_file))
-                    }
-                    if (MediaOperationsService.supportsTrash()) {
-                        FilledTonalButton(
-                            modifier = Modifier.weight(1f).tvFocusRing(),
-                            onClick = { onAction(MoreAction.OpenTrash) },
-                        ) {
-                            Icon(
-                                imageVector = NextIcons.Delete,
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp),
-                            )
-                            Spacer(modifier = Modifier.size(8.dp))
-                            Text(text = stringResource(R.string.trash))
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
+                        Text(text = stringResource(R.string.trash))
                     }
                 }
                 HistorySection(

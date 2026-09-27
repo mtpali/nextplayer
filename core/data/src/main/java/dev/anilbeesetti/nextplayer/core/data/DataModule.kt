@@ -6,27 +6,15 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dev.anilbeesetti.nextplayer.core.data.repository.LocalMediaRepository
 import dev.anilbeesetti.nextplayer.core.data.repository.LocalPreferencesRepository
-import dev.anilbeesetti.nextplayer.core.data.repository.LocalPlaylistRepository
 import dev.anilbeesetti.nextplayer.core.data.repository.LocalSearchHistoryRepository
-import dev.anilbeesetti.nextplayer.core.data.repository.LocalVaultPinRepository
-import dev.anilbeesetti.nextplayer.core.data.repository.LocalVaultRepository
 import dev.anilbeesetti.nextplayer.core.data.repository.MediaRepository
 import dev.anilbeesetti.nextplayer.core.data.repository.PreferencesRepository
-import dev.anilbeesetti.nextplayer.core.data.repository.PlaylistRepository
 import dev.anilbeesetti.nextplayer.core.data.repository.SearchHistoryRepository
-import dev.anilbeesetti.nextplayer.core.data.repository.VaultPinRepository
-import dev.anilbeesetti.nextplayer.core.data.repository.VaultRepository
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 interface DataModule {
-
-    @Binds
-    @Singleton
-    fun bindsPlaylistRepository(
-        playlistRepository: LocalPlaylistRepository,
-    ): PlaylistRepository
 
     @Binds
     fun bindsMediaRepository(
@@ -45,15 +33,4 @@ interface DataModule {
         searchHistoryRepository: LocalSearchHistoryRepository,
     ): SearchHistoryRepository
 
-    @Binds
-    @Singleton
-    fun bindsVaultRepository(
-        vaultRepository: LocalVaultRepository,
-    ): VaultRepository
-
-    @Binds
-    @Singleton
-    fun bindsVaultPinRepository(
-        vaultPinRepository: LocalVaultPinRepository,
-    ): VaultPinRepository
 }

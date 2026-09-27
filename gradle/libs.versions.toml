@@ -9,7 +9,6 @@ androidGradlePlugin = "9.4.0"
 androidMaterial = "1.14.0"
 androidxActivity = "1.13.0"
 androidxAppCompat = "1.8.0"
-androidxBiometric = "1.1.0"
 androidxComposeBom = "2026.09.00"
 androidxMaterial3 = "1.5.0-alpha15"
 androidxMaterial3Adaptive = "1.3.0"
@@ -33,7 +32,6 @@ kotlinxCoroutines = "1.11.0"
 kotlinxSerializationJson = "1.11.0"
 ksp = "2.3.12"
 ktlint = "12.3.0"
-reorderable = "3.1.0"
 room = "2.8.5"
 robolectric = "4.16.1"
 nextlib = "1.11.1-0.16.0"
@@ -46,7 +44,6 @@ accompanist-permissions = { group = "com.google.accompanist", name = "accompanis
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
 androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "androidxActivity" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppCompat" }
-androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "androidxBiometric" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
 androidx-compose-icons = { module = "androidx.compose.material:material-icons-extended" }
 androidx-compose-material-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended" }
@@ -98,7 +95,6 @@ kotlinx-coroutines-guava = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlin-metadata-jvm = { group = "org.jetbrains.kotlin", name = "kotlin-metadata-jvm", version.ref = "kotlin" }
-reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
 [plugins]

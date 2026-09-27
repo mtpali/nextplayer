@@ -40,7 +40,6 @@ fun ControlsTopView(
     onAudioClick: () -> Unit = {},
     onSubtitleClick: () -> Unit = {},
     onPlaybackSpeedClick: () -> Unit = {},
-    onPlaylistClick: () -> Unit = {},
     onScreenshotClick: () -> Unit = {},
     onBackClick: () -> Unit,
 ) {
@@ -90,12 +89,6 @@ fun ControlsTopView(
                 Text(
                     text = videoDecoderLabel,
                     style = MaterialTheme.typography.labelLarge,
-                )
-            }
-            PlayerButton(onClick = onPlaylistClick) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_playlist),
-                    contentDescription = null,
                 )
             }
             PlayerButton(onClick = onPlaybackSpeedClick) {

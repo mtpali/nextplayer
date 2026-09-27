@@ -35,7 +35,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.anilbeesetti.nextplayer.core.common.extensions.getInitialDirectoryUri
 import dev.anilbeesetti.nextplayer.core.common.extensions.getMediaContentUri
 import dev.anilbeesetti.nextplayer.core.common.service.registerForSuspendActivityResult
-import dev.anilbeesetti.nextplayer.core.data.repository.PlaylistRepository
 import dev.anilbeesetti.nextplayer.core.ui.theme.NextPlayerTheme
 import dev.anilbeesetti.nextplayer.feature.player.extensions.OpenDocumentAtInitialUri
 import dev.anilbeesetti.nextplayer.feature.player.extensions.setExtras
@@ -46,13 +45,9 @@ import dev.anilbeesetti.nextplayer.feature.player.service.PlayerService
 import dev.anilbeesetti.nextplayer.feature.player.service.addSubtitleTrack
 import dev.anilbeesetti.nextplayer.feature.player.service.stopPlayerSession
 import dev.anilbeesetti.nextplayer.feature.player.utils.PlayerApi
-import dev.anilbeesetti.nextplayer.feature.player.utils.PlaylistPlaybackContract
-import dev.anilbeesetti.nextplayer.feature.player.utils.toMediaQueue
 import java.util.concurrent.CopyOnWriteArrayList
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.guava.await
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -68,9 +63,6 @@ internal fun shouldResumeExistingPlayback(
 @SuppressLint("UnsafeOptInUsageError")
 @AndroidEntryPoint
 class PlayerActivity : ComponentActivity() {
-
-    @Inject
-    lateinit var playlistRepository: PlaylistRepository
 
     private val viewModel: PlayerViewModel by viewModels()
     val playerPreferences get() = viewModel.uiState.value.playerPreferences
@@ -220,8 +212,7 @@ class PlayerActivity : ComponentActivity() {
 
         val returningFromBackground = !isIntentNew && mediaController?.currentMediaItem != null
         val isNewUriTheCurrentMediaItem = mediaController?.currentMediaItem?.localConfiguration?.uri.toString() == uri.toString()
-        val hasExplicitPlaylist = intent.hasExtra(PlayerApi.API_PLAYLIST) ||
-            intent.hasExtra(PlaylistPlaybackContract.EXTRA_PLAYLIST_ID)
+        val hasExplicitPlaylist = intent.hasExtra(PlayerApi.API_PLAYLIST)
 
         if (shouldResumeExistingPlayback(
                 returningFromBackground = returningFromBackground,
@@ -238,44 +229,15 @@ class PlayerActivity : ComponentActivity() {
 
         playbackRequestJob?.cancel()
         playbackRequestJob = lifecycleScope.launch {
-            playVideo(
-                uri = uri,
-                playlistId = intent.playlistIdOrNull(),
-            )
+            playVideo(uri = uri)
         }
     }
 
-    private suspend fun playVideo(
-        uri: Uri,
-        playlistId: Long?,
-    ) = withContext(Dispatchers.Default) {
-        val savedQueue = playlistId
-            ?.let { playlistRepository.getPlaylist(it) }
-            ?.toMediaQueue(selectedUri = uri.toString())
-
-        if (playlistId != null) {
-            val mediaItems = savedQueue?.mediaItems ?: listOf(
-                MediaItem.Builder()
-                    .setUri(uri)
-                    .setMediaId(uri.toString())
-                    .build(),
-            )
-            val startIndex = savedQueue?.startIndex ?: 0
-            ensureActive()
-            withContext(Dispatchers.Main) {
-                mediaController?.run {
-                    setMediaItems(mediaItems, startIndex, C.TIME_UNSET)
-                    playWhenReady = viewModel.playWhenReady
-                    prepare()
-                }
-            }
-            return@withContext
-        }
-
+    private suspend fun playVideo(uri: Uri) = withContext(Dispatchers.Default) {
         val mediaContentUri = getMediaContentUri(uri)
-        val playlist = playerApi.getPlaylist().takeIf { it.isNotEmpty() }
+        val queue = playerApi.getPlaybackQueue().takeIf { it.isNotEmpty() }
             ?: mediaContentUri?.let { mediaUri ->
-                viewModel.getPlaylistFromUri(mediaUri)
+                viewModel.getPlaybackQueueFromUri(mediaUri)
                     .map { it.uriString }
                     .toMutableList()
                     .apply {
@@ -285,11 +247,11 @@ class PlayerActivity : ComponentActivity() {
                     }
             } ?: listOf(uri.toString())
 
-        val mediaItemIndexToPlay = playlist.indexOfFirst {
+        val mediaItemIndexToPlay = queue.indexOfFirst {
             it == (mediaContentUri ?: uri).toString()
         }.takeIf { it >= 0 } ?: 0
 
-        val mediaItems = playlist.mapIndexed { index, uri ->
+        val mediaItems = queue.mapIndexed { index, uri ->
             MediaItem.Builder().apply {
                 setUri(uri)
                 setMediaId(uri)
@@ -320,11 +282,6 @@ class PlayerActivity : ComponentActivity() {
             }
         }
     }
-
-    private fun Intent.playlistIdOrNull(): Long? = getLongExtra(
-        PlaylistPlaybackContract.EXTRA_PLAYLIST_ID,
-        Long.MIN_VALUE,
-    ).takeUnless { it == Long.MIN_VALUE }
 
     private fun playbackStateListener() = object : Player.Listener {
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {

@@ -14,6 +14,4 @@ object DaoModule {
     @Provides
     fun provideHiddenVideoDao(db: MediaDatabase) = db.hiddenVideoDao()
 
-    @Provides
-    fun providePlaylistDao(db: MediaDatabase) = db.playlistDao()
 }

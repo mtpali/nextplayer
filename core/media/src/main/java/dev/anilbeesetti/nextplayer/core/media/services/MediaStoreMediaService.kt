@@ -140,7 +140,7 @@ class MediaStoreMediaService @Inject constructor(
                 cursor.toMediaVideo()
             }
         } catch (e: Exception) {
-            // uri isn't a MediaStore video uri (e.g. a vault FileProvider uri) and the
+            // uri isn't a MediaStore video uri (e.g. a document provider uri) and the
             // provider rejected the MediaStore-specific projection outright. Not finding a
             // MediaStore row for it is the correct outcome, not a crash.
             null
@@ -234,12 +234,12 @@ class MediaStoreMediaService @Inject constructor(
      * expose MediaStore's video columns.
      *
      * [findVideo] runs this against whatever content uri it's given, which isn't always a
-     * MediaStore uri - vault playback, for example, passes a [androidx.core.content.FileProvider]
+     * MediaStore uri - a document picker, for example, can pass a content provider
      * uri whose cursor only ever has DISPLAY_NAME/SIZE columns. Querying MediaStore-specific
      * columns (DATA, DURATION, etc) against that cursor has no matching column, and
      * [Cursor.getColumnIndexOrThrow] throws IllegalArgumentException in that case. That
      * exception was previously unhandled here, which crashed the coroutine awaiting this result
-     * and made vault playback close immediately. Resolving column indices safely up front avoids
+     * and made playback close immediately. Resolving column indices safely up front avoids
      * that crash and simply reports "not found" for any uri that isn't a MediaStore video uri.
      */
     private fun Cursor.toMediaVideo(): MediaVideo? {

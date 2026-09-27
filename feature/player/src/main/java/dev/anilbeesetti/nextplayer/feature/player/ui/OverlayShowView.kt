@@ -92,10 +92,6 @@ fun BoxScope.OverlayShowView(
         onDismiss = onDismiss,
     )
 
-    PlaylistView(
-        show = overlayView == OverlayView.PLAYLIST,
-        player = player,
-    )
 }
 
 val Configuration.isPortrait: Boolean
@@ -108,5 +104,4 @@ enum class OverlayView {
     SUBTITLE_APPEARANCE,
     PLAYBACK_SPEED,
     VIDEO_CONTENT_SCALE,
-    PLAYLIST,
 }

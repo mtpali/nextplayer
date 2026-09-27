@@ -48,7 +48,7 @@ The downloadable GitHub Actions artifact is named `Player-armv7`.
 ## Upstream
 
 Player retains the original package structure and the upstream player, library,
-subtitle, decoder, Android TV, playlist, vault, and appearance functionality from
+subtitle, decoder, Android TV, and appearance functionality from
 Next Player. See the original project for its full history and contributors:
 [anilbeesetti/nextplayer](https://github.com/anilbeesetti/nextplayer).
 

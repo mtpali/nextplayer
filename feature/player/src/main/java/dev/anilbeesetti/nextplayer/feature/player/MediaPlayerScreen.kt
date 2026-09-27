@@ -414,10 +414,6 @@ fun MediaPlayerScreen(
                                         controlsVisibilityState.hideControls()
                                         overlayView = OverlayView.PLAYBACK_SPEED
                                     },
-                                    onPlaylistClick = {
-                                        controlsVisibilityState.hideControls()
-                                        overlayView = OverlayView.PLAYLIST
-                                    },
                                     onScreenshotClick = {
                                         videoBounds?.let { bounds ->
                                             controlsVisibilityState.hideControls()

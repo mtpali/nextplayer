@@ -232,7 +232,6 @@
     <string name="mark_last_played_media_desc">Mark last played media in home and in each folder</string>
     <string name="open_local_video">Open local video</string>
     <string name="open_network_stream">Open network stream</string>
-    <string name="pick_file">Pick file</string>
     <string name="exit">Exit</string>
     <string name="play_next_video">Play next video</string>
     <string name="skip_silence">Skip silence</string>
@@ -343,53 +342,6 @@
     <string name="material_you_controls">Material You controls</string>
     <string name="material_you_controls_description">Use material you style controls</string>
 
-    <!-- Vault -->
-    <string name="hide">Hide</string>
-    <string name="unhide">Unhide</string>
-    <string name="vault">Vault</string>
-    <string name="hidden_videos">Hidden videos</string>
-    <string name="hide_one_video_confirmation">Hide this video?</string>
-    <string name="hide_videos_confirmation">Hide %1$d videos?</string>
-    <string name="hide_video_info">Hidden videos are moved into a private vault protected by a PIN and removed from your gallery.</string>
-    <string name="hiding_videos_in_progress">Hiding…</string>
-    <string name="unhiding_videos_in_progress">Unhiding…</string>
-    <plurals name="videos_relocated_to_movies">
-        <item quantity="one">Couldn\'t restore to its original folder — moved to Movies/</item>
-        <item quantity="other">Couldn\'t restore %1$d videos to their original folders — moved to Movies/</item>
-    </plurals>
-    <string name="hiding_videos">Hiding\u2026</string>
-    <string name="set_vault_pin">Set vault PIN</string>
-    <string name="set_vault_pin_description">Create a 4-digit PIN to protect your hidden videos</string>
-    <string name="confirm_vault_pin">Confirm PIN</string>
-    <string name="confirm_vault_pin_description">Re-enter your PIN to confirm</string>
-    <string name="enter_vault_pin">Enter PIN</string>
-    <string name="enter_vault_pin_description">Enter your PIN to access hidden videos</string>
-    <string name="pins_do_not_match">PINs don\'t match. Try again</string>
-    <string name="incorrect_pin">Incorrect PIN</string>
-    <string name="open_vault">Open vault</string>
-    <string name="open_vault_description">Access your hidden videos</string>
-    <string name="unlock_with_biometrics">Unlock with biometrics</string>
-    <string name="use_vault_pin">Use vault PIN</string>
-    <string name="vault_biometric_setup_title">Use biometrics to unlock?</string>
-    <string name="vault_biometric_setup_description">Unlock your vault with your fingerprint or face. Confirm with a biometric scan to enable it. You can still use your PIN and turn this off in Vault settings.</string>
-    <string name="enable_biometric_unlock">Enable biometric unlock</string>
-    <string name="not_now">Not now</string>
-    <string name="vault_settings">Vault settings</string>
-    <string name="vault_biometric_description">Use your fingerprint or face to unlock. Your vault PIN remains available.</string>
-    <string name="vault_biometric_unavailable">Set up a supported fingerprint or face in your device settings to enable biometric unlock.</string>
-    <string name="vault_empty_title">No hidden videos</string>
-    <string name="vault_empty_description">Videos you hide will show up here. Long press a video and tap Hide to add it to the vault.</string>
-    <string name="unhide_one_video_confirmation">Unhide this video? It will be moved back to its original location.</string>
-    <string name="unhide_videos_confirmation">Unhide %1$d videos? They will be moved back to their original location.</string>
-    <string name="delete_one_video_from_vault">Permanently delete this video?</string>
-    <string name="delete_videos_from_vault">Permanently delete %1$d videos?</string>
-    <string name="delete_from_vault_info">This action cannot be undone. The video will be permanently deleted from your device.</string>
-    <string name="sort_by">Sort by</string>
-    <string name="name">Name</string>
-    <string name="date_hidden">Date hidden</string>
-    <string name="forgot_pin">Forgot PIN?</string>
-    <string name="reset_vault_pin_confirmation">Resetting your PIN will permanently delete all videos currently in the vault, since they can no longer be unlocked. Continue?</string>
-    <string name="reset_pin_and_delete_all">Reset PIN &amp; delete all</string>
 
     <!-- Network -->
     <string name="home">Home</string>
@@ -431,67 +383,6 @@
     </plurals>
     <string name="cannot_move_to_same_folder">Can\'t move to the same folder</string>
 
-    <!-- Playlists -->
-    <string name="playlists">Playlists</string>
-    <string name="create_playlist">Create playlist</string>
-    <string name="choose_playlist_type">Create a playlist</string>
-    <string name="create_local_playlist">Create local playlist</string>
-    <string name="add_m3u_url_playlist">Add M3U playlist from URL</string>
-    <string name="add_m3u_file_playlist">Add M3U playlist from file</string>
-    <string name="playlist_url">M3U URL</string>
-    <string name="url_required">Enter an M3U URL.</string>
-    <string name="invalid_url">Enter a valid HTTP or HTTPS URL.</string>
-    <string name="m3u_url_playlist">M3U URL</string>
-    <string name="m3u_file_playlist">M3U File</string>
-    <string name="m3u_file_permission_failed">Couldn\'t keep access to this file. Choose it again or use another file.</string>
-    <string name="refresh_playlist">Refresh playlist</string>
-    <string name="refreshing_playlist">Refreshing playlist</string>
-    <string name="playlist_refresh_succeeded">Playlist refreshed.</string>
-    <string name="playlist_refresh_failed">Couldn\'t refresh playlist. The saved items are unchanged.</string>
-    <string name="last_refreshed">Last refreshed %1$s</string>
-    <string name="rename_playlist">Rename playlist</string>
-    <string name="playlist_name">Playlist name</string>
-    <string name="create">Create</string>
-    <string name="save">Save</string>
-    <string name="name_required">Enter a playlist name.</string>
-    <string name="saving_playlist">Saving playlist…</string>
-    <string name="no_playlists_title">No playlists yet</string>
-    <string name="no_playlists_description">Create a local playlist or add an M3U source to start watching.</string>
-    <string name="local_playlist">Local</string>
-    <string name="delete_playlist">Delete playlist</string>
-    <string name="delete_playlist_confirmation">Delete “%1$s” and its saved order?</string>
-    <string name="playlist_actions">Playlist actions</string>
-    <string name="play_all">Play all</string>
-    <string name="remove_video">Remove video</string>
-    <string name="remove_video_confirmation">Remove “%1$s” from this playlist?</string>
-    <string name="reorder_playlist">Reorder playlist</string>
-    <string name="finish_reordering">Finish reordering</string>
-    <string name="reorder_playlist_item">Reorder playlist item</string>
-    <string name="empty_playlist_title">This playlist is empty</string>
-    <string name="empty_playlist_description">Select videos in Home and choose Add to playlist.</string>
-    <string name="playlist_unavailable">This playlist is no longer available.</string>
-    <string name="search_playlist">Search playlist</string>
-    <string name="close_search">Close search</string>
-    <string name="no_matching_videos">No matching videos</string>
-    <string name="add_to_playlist">Add to playlist</string>
-    <string name="choose_playlist">Choose a playlist</string>
-    <string name="create_new_playlist">Create new playlist</string>
-    <string name="existing_playlists">Existing playlists</string>
-    <string name="no_playlists">No playlists yet.</string>
-    <string name="already_in_playlist">The selected videos are already in this playlist.</string>
-    <string name="playlist_delete_failed">Couldn\'t delete playlist. Try again.</string>
-    <string name="playlist_save_failed">Couldn\'t save playlist. Try again.</string>
-    <string name="playlist_update_failed">Couldn\'t update playlist. Try again.</string>
-    <string name="playlist_selection_empty">No local videos were found in this selection.</string>
-    <string name="playlist_selection_read_failed">Couldn\'t read the selected videos. Try again.</string>
-    <plurals name="added_videos_to_playlist">
-        <item quantity="one">Added %d video to playlist.</item>
-        <item quantity="other">Added %d videos to playlist.</item>
-    </plurals>
-    <plurals name="playlist_video_count">
-        <item quantity="one">%d video</item>
-        <item quantity="other">%d videos</item>
-    </plurals>
     <string name="decoder_mode_auto">Auto</string>
     <string name="settings_description">App preferences</string>
     <string name="more">More</string>
