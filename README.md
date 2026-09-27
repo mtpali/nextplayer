@@ -13,6 +13,9 @@ The shipped APK is intentionally limited to `armeabi-v7a` (ARMv7).
 - Paste HTTP, HTTPS, HLS, DASH, or RTSP links in the Network tab and play them directly.
 - Download HTTP and HTTPS files in the background with progress, notifications, retry, open, and remove actions.
 - Receive browser links through the dedicated “Download with Player” activity.
+- To choose Player in Firefox's download dialog, enable Settings → Download Settings →
+  Manage downloads with another app. The download activity accepts typed HTTP(S)
+  links without appearing as a handler for files already saved on the device.
 - Capture the visible video frame from the player controls and save it under `Pictures/Player`.
 - Use the supplied Player launcher icon without adaptive-icon zoom.
 - Show Mobile Tina Instagram and developer Telegram destinations in a modern About screen.
