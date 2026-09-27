@@ -18,20 +18,20 @@ import org.robolectric.RuntimeEnvironment
 @RunWith(RobolectricTestRunner::class)
 class SubtitleViewStyleTest {
     @Test
-    fun `yellow subtitles with black outline use Media3 outline edges`() {
-        val configuration = baseConfiguration().copy(textColor = Color.YELLOW, blackOutline = true)
+    fun `yellow subtitles with black shadow use Media3 drop shadow edges`() {
+        val configuration = baseConfiguration().copy(textColor = Color.YELLOW, blackShadow = true)
 
         val style = configuration.toCaptionStyle(RuntimeEnvironment.getApplication())
 
         assertEquals(Color.YELLOW, style.foregroundColor)
-        assertEquals(CaptionStyleCompat.EDGE_TYPE_OUTLINE, style.edgeType)
+        assertEquals(CaptionStyleCompat.EDGE_TYPE_DROP_SHADOW, style.edgeType)
         assertEquals(Color.BLACK, style.edgeColor)
         assertTrue(configuration.hasCustomAppearance)
     }
 
     @Test
-    fun `black outline overrides a system caption style with white edges`() {
-        val configuration = baseConfiguration().copy(useSystemCaptionStyle = true, blackOutline = true)
+    fun `black shadow overrides a system caption style with white edges`() {
+        val configuration = baseConfiguration().copy(useSystemCaptionStyle = true, blackShadow = true)
         val appStyle = configuration.toCaptionStyle(RuntimeEnvironment.getApplication())
         val systemStyle = CaptionStyleCompat(
             Color.WHITE,
@@ -44,7 +44,7 @@ class SubtitleViewStyleTest {
 
         val effectiveStyle = configuration.resolveCaptionStyle(appStyle, systemStyle)
 
-        assertEquals(CaptionStyleCompat.EDGE_TYPE_OUTLINE, effectiveStyle.edgeType)
+        assertEquals(CaptionStyleCompat.EDGE_TYPE_DROP_SHADOW, effectiveStyle.edgeType)
         assertEquals(Color.BLACK, effectiveStyle.edgeColor)
     }
 
@@ -86,13 +86,13 @@ class SubtitleViewStyleTest {
     }
 
     @Test
-    fun `default subtitles retain their white text and shadow`() {
+    fun `default subtitles retain white text without a custom shadow`() {
         val configuration = baseConfiguration()
 
         val style = configuration.toCaptionStyle(RuntimeEnvironment.getApplication())
 
         assertEquals(Color.WHITE, style.foregroundColor)
-        assertEquals(CaptionStyleCompat.EDGE_TYPE_DROP_SHADOW, style.edgeType)
+        assertEquals(CaptionStyleCompat.EDGE_TYPE_NONE, style.edgeType)
         assertFalse(configuration.hasCustomAppearance)
     }
 
@@ -105,7 +105,7 @@ class SubtitleViewStyleTest {
         verticalPosition = 8,
         textBold = true,
         textColor = Color.WHITE,
-        blackOutline = false,
+        blackShadow = false,
         applyEmbeddedStyles = true,
     )
 }

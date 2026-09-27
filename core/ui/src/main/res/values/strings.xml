@@ -129,9 +129,9 @@
     <string name="subtitle_text_color">Subtitle text color</string>
     <string name="subtitle_color_white">White</string>
     <string name="subtitle_color_yellow">Yellow</string>
-    <string name="subtitle_black_outline">Black outline</string>
-    <string name="subtitle_black_outline_desc">Draw a black border around subtitle letters</string>
-    <string name="embedded_styles_custom_overridden">Custom font, color, or outline takes priority over styles in subtitle files</string>
+    <string name="subtitle_black_shadow">Black text shadow</string>
+    <string name="subtitle_black_shadow_desc">Show a black shadow behind subtitle text</string>
+    <string name="embedded_styles_custom_overridden">Custom font, color, or shadow takes priority over styles in subtitle files</string>
     <string name="subtitle_text_bold">Bold subtitle text</string>
     <string name="subtitle_text_bold_desc">Use bold text for subtitle</string>
     <string name="subtitle_text_size">Subtitle text size</string>

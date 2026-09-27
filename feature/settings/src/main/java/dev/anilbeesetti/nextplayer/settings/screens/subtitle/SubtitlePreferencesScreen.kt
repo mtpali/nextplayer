@@ -22,7 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -50,6 +50,8 @@ import dev.anilbeesetti.nextplayer.settings.composables.OptionsDialog
 import dev.anilbeesetti.nextplayer.settings.extensions.name
 import dev.anilbeesetti.nextplayer.settings.utils.LocalesHelper
 import java.nio.charset.Charset
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun SubtitlePreferencesScreen(
@@ -69,7 +71,9 @@ private fun SubtitlePreferencesScreenContent(
     state: SubtitlePreferencesUiState,
     onAction: (SubtitlePreferencesUiEvent) -> Unit,
 ) {
-    val languages = remember { listOf(Pair("None", "")) + LocalesHelper.getAvailableLocales() }
+    val languages by produceState(initialValue = listOf("None" to "")) {
+        value = withContext(Dispatchers.Default) { listOf("None" to "") + LocalesHelper.getAvailableLocales() }
+    }
     val charsetResource = stringArrayResource(id = R.array.charsets_list)
     val context = LocalContext.current
     val fontPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -77,7 +81,7 @@ private fun SubtitlePreferencesScreenContent(
     }
     val customAppearanceActive = state.preferences.subtitleFont == Font.CUSTOM ||
         state.preferences.subtitleTextColor != Color.WHITE ||
-        state.preferences.subtitleBlackOutline
+        state.preferences.subtitleBlackShadow
 
     val listFocusRequester = rememberTvListFocusRequester()
     Scaffold(
@@ -110,8 +114,8 @@ private fun SubtitlePreferencesScreenContent(
             ) {
                 ClickablePreferenceItem(
                     title = stringResource(id = R.string.preferred_subtitle_lang),
-                    description = LocalesHelper.getLocaleDisplayLanguage(state.preferences.preferredSubtitleLanguage)
-                        .takeIf { it.isNotBlank() } ?: stringResource(R.string.preferred_subtitle_lang_description),
+                    description = languages.firstOrNull { it.second.isNotEmpty() && it.second == state.preferences.preferredSubtitleLanguage }?.first
+                        ?: stringResource(R.string.preferred_subtitle_lang_description),
                     icon = NextIcons.Language,
                     onClick = { onAction(SubtitlePreferencesUiEvent.ShowDialog(SubtitlePreferenceDialog.SubtitleLanguageDialog)) },
                     isFirstItem = true,
@@ -224,12 +228,12 @@ private fun SubtitlePreferencesScreenContent(
                     onClick = { onAction(SubtitlePreferencesUiEvent.ToggleSubtitleBackground) },
                 )
                 PreferenceSwitch(
-                    title = stringResource(R.string.subtitle_black_outline),
-                    description = stringResource(R.string.subtitle_black_outline_desc),
+                    title = stringResource(R.string.subtitle_black_shadow),
+                    description = stringResource(R.string.subtitle_black_shadow_desc),
                     icon = NextIcons.Style,
                     enabled = state.preferences.useSystemCaptionStyle.not(),
-                    isChecked = state.preferences.subtitleBlackOutline,
-                    onClick = { onAction(SubtitlePreferencesUiEvent.ToggleSubtitleBlackOutline) },
+                    isChecked = state.preferences.subtitleBlackShadow,
+                    onClick = { onAction(SubtitlePreferencesUiEvent.ToggleSubtitleBlackShadow) },
                 )
                 PreferenceSwitch(
                     title = stringResource(R.string.embedded_styles),

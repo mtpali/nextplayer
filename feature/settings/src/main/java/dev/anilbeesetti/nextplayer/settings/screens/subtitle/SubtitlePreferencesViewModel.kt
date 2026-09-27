@@ -70,7 +70,7 @@ class SubtitlePreferencesViewModel @AssistedInject constructor(
             is SubtitlePreferencesUiEvent.UpdateSubtitleFontSize -> updateSubtitleFontSize(action.value)
             is SubtitlePreferencesUiEvent.UpdateSubtitleVerticalPosition -> updateSubtitleVerticalPosition(action.value)
             is SubtitlePreferencesUiEvent.UpdateSubtitleTextColor -> updateSubtitleTextColor(action.value)
-            is SubtitlePreferencesUiEvent.ToggleSubtitleBlackOutline -> toggleSubtitleBlackOutline()
+            is SubtitlePreferencesUiEvent.ToggleSubtitleBlackShadow -> toggleSubtitleBlackShadow()
             is SubtitlePreferencesUiEvent.ToggleSubtitleBackground -> toggleSubtitleBackground()
             is SubtitlePreferencesUiEvent.ToggleApplyEmbeddedStyles -> toggleApplyEmbeddedStyles()
             is SubtitlePreferencesUiEvent.UpdateSubtitleEncoding -> updateSubtitleEncoding(action.value)
@@ -134,9 +134,9 @@ class SubtitlePreferencesViewModel @AssistedInject constructor(
         }
     }
 
-    private fun toggleSubtitleBlackOutline() {
+    private fun toggleSubtitleBlackShadow() {
         viewModelScope.launch {
-            preferencesRepository.updatePlayerPreferences { it.copy(subtitleBlackOutline = !it.subtitleBlackOutline) }
+            preferencesRepository.updatePlayerPreferences { it.copy(subtitleBlackShadow = !it.subtitleBlackShadow) }
         }
     }
 
@@ -217,7 +217,7 @@ sealed interface SubtitlePreferencesUiEvent {
     data class UpdateSubtitleFontSize(val value: Int) : SubtitlePreferencesUiEvent
     data class UpdateSubtitleVerticalPosition(val value: Int) : SubtitlePreferencesUiEvent
     data class UpdateSubtitleTextColor(val value: Int) : SubtitlePreferencesUiEvent
-    data object ToggleSubtitleBlackOutline : SubtitlePreferencesUiEvent
+    data object ToggleSubtitleBlackShadow : SubtitlePreferencesUiEvent
     data object ToggleSubtitleBackground : SubtitlePreferencesUiEvent
     data object ToggleApplyEmbeddedStyles : SubtitlePreferencesUiEvent
     data class UpdateSubtitleEncoding(val value: String) : SubtitlePreferencesUiEvent

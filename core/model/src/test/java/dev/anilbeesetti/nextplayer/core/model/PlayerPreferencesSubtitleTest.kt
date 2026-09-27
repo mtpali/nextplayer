@@ -18,7 +18,7 @@ class PlayerPreferencesSubtitleTest {
         assertEquals(24, preferences.subtitleTextSize)
         assertEquals(PlayerPreferences.DEFAULT_SUBTITLE_VERTICAL_POSITION, preferences.subtitleVerticalPosition)
         assertEquals(PlayerPreferences.DEFAULT_SUBTITLE_TEXT_COLOR, preferences.subtitleTextColor)
-        assertFalse(preferences.subtitleBlackOutline)
+        assertFalse(preferences.subtitleBlackShadow)
         assertNull(preferences.customSubtitleFontId)
     }
 
@@ -29,11 +29,21 @@ class PlayerPreferencesSubtitleTest {
             customSubtitleFontId = "d38d13c1-6df1-4f1f-8cb0-b116782ad8d2.ttf",
             customSubtitleFontName = "My Font.ttf",
             subtitleTextColor = 0xFFFFFF00.toInt(),
-            subtitleBlackOutline = true,
+            subtitleBlackShadow = true,
             subtitleVerticalPosition = 15,
         )
 
         val encoded = Json.encodeToString(PlayerPreferences.serializer(), preferences)
         assertEquals(preferences, Json.decodeFromString(PlayerPreferences.serializer(), encoded))
+    }
+
+    @Test
+    fun `existing outline setting becomes a black shadow`() {
+        val preferences = Json.decodeFromString(
+            PlayerPreferences.serializer(),
+            """{"subtitleBlackOutline":true}""",
+        )
+
+        assertEquals(true, preferences.subtitleBlackShadow)
     }
 }

@@ -75,11 +75,11 @@ data class SubtitleConfiguration(
     val verticalPosition: Int,
     val textBold: Boolean,
     val textColor: Int,
-    val blackOutline: Boolean,
+    val blackShadow: Boolean,
     val applyEmbeddedStyles: Boolean,
 ) {
     val hasCustomAppearance: Boolean
-        get() = font == Font.CUSTOM || textColor != Color.WHITE || blackOutline
+        get() = font == Font.CUSTOM || textColor != Color.WHITE || blackShadow
 
     val bottomPaddingFraction: Float
         get() = verticalPosition.coerceIn(0, 30) / 100f
@@ -116,7 +116,7 @@ internal fun SubtitleConfiguration.toCaptionStyle(context: Context): CaptionStyl
         textColor,
         if (showBackground) Color.BLACK else Color.TRANSPARENT,
         Color.TRANSPARENT,
-        if (blackOutline) CaptionStyleCompat.EDGE_TYPE_OUTLINE else CaptionStyleCompat.EDGE_TYPE_DROP_SHADOW,
+        if (blackShadow) CaptionStyleCompat.EDGE_TYPE_DROP_SHADOW else CaptionStyleCompat.EDGE_TYPE_NONE,
         Color.BLACK,
         Typeface.create(baseTypeface, if (textBold) Typeface.BOLD else Typeface.NORMAL),
     )

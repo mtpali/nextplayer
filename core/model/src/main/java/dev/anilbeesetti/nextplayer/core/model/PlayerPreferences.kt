@@ -1,7 +1,10 @@
 package dev.anilbeesetti.nextplayer.core.model
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class PlayerPreferences(
     val resume: Resume = Resume.YES,
@@ -58,7 +61,8 @@ data class PlayerPreferences(
     val customSubtitleFontName: String? = null,
     val subtitleTextBold: Boolean = true,
     val subtitleTextColor: Int = DEFAULT_SUBTITLE_TEXT_COLOR,
-    val subtitleBlackOutline: Boolean = false,
+    @JsonNames("subtitleBlackOutline")
+    val subtitleBlackShadow: Boolean = false,
     val applyEmbeddedStyles: Boolean = true,
 ) {
 

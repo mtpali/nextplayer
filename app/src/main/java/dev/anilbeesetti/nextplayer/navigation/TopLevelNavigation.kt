@@ -209,10 +209,10 @@ internal fun TopLevelNavState.navigationTransition(initialState: Scene<NavKey>, 
     val isPop = initialState.previousEntries.any { it.contentKey == targetState.entries.lastOrNull()?.contentKey }
     return slideInHorizontally(
         initialOffsetX = { if (isPop) -(it * 0.3f).toInt() else it },
-        animationSpec = tween(durationMillis = 200, easing = LinearEasing),
+        animationSpec = tween(durationMillis = 120, easing = LinearEasing),
     ) togetherWith slideOutHorizontally(
         targetOffsetX = { if (isPop) it else -(it * 0.3f).toInt() },
-        animationSpec = tween(durationMillis = 200, easing = LinearEasing),
+        animationSpec = tween(durationMillis = 120, easing = LinearEasing),
     )
 }
 

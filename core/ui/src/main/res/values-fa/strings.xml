@@ -119,9 +119,9 @@
     <string name="subtitle_text_color">رنگ متن زیرنویس</string>
     <string name="subtitle_color_white">سفید</string>
     <string name="subtitle_color_yellow">زرد</string>
-    <string name="subtitle_black_outline">حاشیه مشکی</string>
-    <string name="subtitle_black_outline_desc">نمایش حاشیه مشکی دور حروف زیرنویس</string>
-    <string name="embedded_styles_custom_overridden">فونت، رنگ یا حاشیه دلخواه بر سبک‌های داخل فایل زیرنویس اولویت دارد</string>
+    <string name="subtitle_black_shadow">سایهٔ مشکی متن</string>
+    <string name="subtitle_black_shadow_desc">نمایش سایهٔ مشکی پشت متن زیرنویس</string>
+    <string name="embedded_styles_custom_overridden">فونت، رنگ یا سایهٔ دلخواه بر سبک‌های داخل فایل زیرنویس اولویت دارد</string>
     <string name="default_name">پیشفرض</string>
     <string name="play_file">بازکردن پرونده ویدیویی برای پخش</string>
     <string name="subtitle_text_bold">زیرنویس درشت</string>

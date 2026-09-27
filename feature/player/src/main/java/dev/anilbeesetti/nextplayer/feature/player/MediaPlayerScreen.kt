@@ -309,7 +309,7 @@ fun MediaPlayerScreen(
                         verticalPosition = previewSubtitleVerticalPosition,
                         textBold = playerPreferences.subtitleTextBold,
                         textColor = playerPreferences.subtitleTextColor,
-                        blackOutline = playerPreferences.subtitleBlackOutline,
+                        blackShadow = playerPreferences.subtitleBlackShadow,
                         applyEmbeddedStyles = playerPreferences.applyEmbeddedStyles,
                     ),
                     onVideoBoundsChanged = { videoBounds = it },
