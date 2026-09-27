@@ -309,7 +309,7 @@ class SegmentedDownloadService : Service() {
             val values = ContentValues().apply {
                 put(MediaStore.Downloads.DISPLAY_NAME, record.title)
                 put(MediaStore.Downloads.MIME_TYPE, mimeType)
-                put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/Player")
+                put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/")
                 put(MediaStore.Downloads.IS_PENDING, 1)
             }
             val uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
@@ -331,12 +331,10 @@ class SegmentedDownloadService : Service() {
                 throw error
             }
         } else {
-            val publicDirectory = File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                "Player",
-            ).apply { mkdirs() }
+            val publicDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                .apply { mkdirs() }
             val outputFile = uniqueFile(publicDirectory, record.title)
-            runCatching {
+            try {
                 FileOutputStream(outputFile).buffered(BUFFER_SIZE).use { output ->
                     parts.forEach { part ->
                         part.inputStream().buffered(BUFFER_SIZE).use { input ->
@@ -345,20 +343,9 @@ class SegmentedDownloadService : Service() {
                     }
                 }
                 FileProvider.getUriForFile(this, "$packageName.fileprovider", outputFile)
-            }.getOrElse {
-                val fallbackDirectory = File(
-                    getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: filesDir,
-                    "Player",
-                ).apply { mkdirs() }
-                val fallbackFile = uniqueFile(fallbackDirectory, record.title)
-                FileOutputStream(fallbackFile).buffered(BUFFER_SIZE).use { output ->
-                    parts.forEach { part ->
-                        part.inputStream().buffered(BUFFER_SIZE).use { input ->
-                            input.copyTo(output, BUFFER_SIZE)
-                        }
-                    }
-                }
-                FileProvider.getUriForFile(this, "$packageName.fileprovider", fallbackFile)
+            } catch (error: Exception) {
+                outputFile.delete()
+                throw error
             }
         }
     }

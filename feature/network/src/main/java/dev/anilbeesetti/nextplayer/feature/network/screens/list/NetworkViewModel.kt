@@ -35,6 +35,7 @@ enum class NetworkMessage {
     INVALID_DOWNLOAD_URL,
     DOWNLOAD_STARTED,
     DOWNLOAD_FAILED,
+    DOWNLOAD_PERMISSION_DENIED,
     CANNOT_OPEN_DOWNLOAD,
 }
 
@@ -71,6 +72,7 @@ class NetworkViewModel @AssistedInject constructor(
         when (action) {
             NetworkAction.OpenSettings -> output.openSettings()
             NetworkAction.MessageShown -> stateInternal.update { it.copy(message = null) }
+            NetworkAction.DownloadPermissionDenied -> showMessage(NetworkMessage.DOWNLOAD_PERMISSION_DENIED)
             is NetworkAction.OpenStream -> openStream(action.url)
             is NetworkAction.EnqueueDownload -> enqueueDownload(action.url)
             is NetworkAction.OpenDownload -> {
@@ -129,6 +131,7 @@ class NetworkViewModel @AssistedInject constructor(
 sealed interface NetworkAction {
     data object OpenSettings : NetworkAction
     data object MessageShown : NetworkAction
+    data object DownloadPermissionDenied : NetworkAction
     data class OpenStream(val url: String) : NetworkAction
     data class EnqueueDownload(val url: String) : NetworkAction
     data class OpenDownload(val id: Long) : NetworkAction

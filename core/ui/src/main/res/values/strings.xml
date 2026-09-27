@@ -509,6 +509,7 @@
     <string name="invalid_download_url">Enter a valid HTTP or HTTPS download link.</string>
     <string name="download_started">Download started</string>
     <string name="download_failed">Download failed</string>
+    <string name="downloads_storage_permission_required">Allow storage access to save files in Downloads.</string>
     <string name="cannot_open_download">No app can open this file.</string>
     <string name="download_pending">Waiting</string>
     <string name="download_running">Downloading</string>

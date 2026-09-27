@@ -1,5 +1,8 @@
 package dev.anilbeesetti.nextplayer.feature.network.screens.list
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -41,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,13 +61,38 @@ import dev.anilbeesetti.nextplayer.core.ui.extensions.copy
 import dev.anilbeesetti.nextplayer.core.ui.theme.NextPlayerTheme
 import dev.anilbeesetti.nextplayer.feature.network.download.DownloadStatus
 import dev.anilbeesetti.nextplayer.feature.network.download.ManagedDownload
+import dev.anilbeesetti.nextplayer.feature.network.download.canWritePublicDownloads
 import dev.anilbeesetti.nextplayer.feature.network.download.formatByteCount
+import dev.anilbeesetti.nextplayer.feature.network.download.isValidHttpUrl
 import kotlin.math.roundToInt
 
 @Composable
 fun NetworkScreen(viewModel: NetworkViewModel) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    NetworkScreenContent(state = state, onAction = viewModel::onAction)
+    val context = LocalContext.current
+    var pendingDownloadAction by remember { mutableStateOf<NetworkAction?>(null) }
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) {
+            pendingDownloadAction?.let(viewModel::onAction)
+        } else {
+            viewModel.onAction(NetworkAction.DownloadPermissionDenied)
+        }
+        pendingDownloadAction = null
+    }
+    NetworkScreenContent(
+        state = state,
+        onAction = viewModel::onAction,
+        onDownloadAction = { action ->
+            if ((action is NetworkAction.EnqueueDownload && !isValidHttpUrl(action.url)) ||
+                context.canWritePublicDownloads()
+            ) {
+                viewModel.onAction(action)
+            } else {
+                pendingDownloadAction = action
+                permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        },
+    )
 }
 
 @Suppress("DEPRECATION")
@@ -71,6 +100,7 @@ fun NetworkScreen(viewModel: NetworkViewModel) {
 internal fun NetworkScreenContent(
     state: NetworkUiState,
     onAction: (NetworkAction) -> Unit,
+    onDownloadAction: (NetworkAction) -> Unit = onAction,
 ) {
     var streamUrl by rememberSaveable { mutableStateOf("") }
     var downloadUrl by rememberSaveable { mutableStateOf("") }
@@ -137,7 +167,7 @@ internal fun NetworkScreenContent(
                         onValueChange = { downloadUrl = it },
                         onPaste = { clipboard.getText()?.text?.let { downloadUrl = it } },
                         actionText = stringResource(R.string.download),
-                        onAction = { onAction(NetworkAction.EnqueueDownload(downloadUrl)) },
+                        onAction = { onDownloadAction(NetworkAction.EnqueueDownload(downloadUrl)) },
                     )
                 }
                 item {
@@ -155,7 +185,7 @@ internal fun NetworkScreenContent(
                         DownloadItem(
                             item = item,
                             onOpen = { onAction(NetworkAction.OpenDownload(item.id)) },
-                            onRetry = { onAction(NetworkAction.RetryDownload(item.id)) },
+                            onRetry = { onDownloadAction(NetworkAction.RetryDownload(item.id)) },
                             onRemove = { downloadToRemove = item },
                         )
                     }
@@ -392,6 +422,7 @@ private val NetworkMessage.stringRes: Int
         NetworkMessage.INVALID_DOWNLOAD_URL -> R.string.invalid_download_url
         NetworkMessage.DOWNLOAD_STARTED -> R.string.download_started
         NetworkMessage.DOWNLOAD_FAILED -> R.string.download_failed
+        NetworkMessage.DOWNLOAD_PERMISSION_DENIED -> R.string.downloads_storage_permission_required
         NetworkMessage.CANNOT_OPEN_DOWNLOAD -> R.string.cannot_open_download
     }
 

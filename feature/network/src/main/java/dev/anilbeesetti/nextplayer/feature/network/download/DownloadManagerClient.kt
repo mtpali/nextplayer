@@ -1,10 +1,14 @@
 package dev.anilbeesetti.nextplayer.feature.network.download
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.webkit.MimeTypeMap
 import android.webkit.URLUtil
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import java.io.File
 import kotlinx.serialization.Serializable
@@ -150,17 +154,20 @@ class DownloadManagerClient(context: Context) {
     private val store = DownloadStore(appContext)
 
     init {
-        store.list()
-            .filter {
-                it.status == DownloadStatus.PENDING ||
-                    it.status == DownloadStatus.RUNNING ||
-                    it.status == DownloadStatus.PAUSED
-            }
-            .forEach { SegmentedDownloadService.start(appContext, it.id) }
+        if (appContext.canWritePublicDownloads()) {
+            store.list()
+                .filter {
+                    it.status == DownloadStatus.PENDING ||
+                        it.status == DownloadStatus.RUNNING ||
+                        it.status == DownloadStatus.PAUSED
+                }
+                .forEach { SegmentedDownloadService.start(appContext, it.id) }
+        }
     }
 
     fun enqueue(rawUrl: String): Result<Long> = runCatching {
         require(isValidHttpUrl(rawUrl)) { "Invalid download URL" }
+        require(appContext.canWritePublicDownloads()) { "Storage permission is needed for Downloads" }
         val record = store.create(rawUrl.trim())
         SegmentedDownloadService.start(appContext, record.id)
         record.id
@@ -169,6 +176,7 @@ class DownloadManagerClient(context: Context) {
     fun query(): List<ManagedDownload> = store.list().map(PersistedDownload::toManagedDownload)
 
     fun retry(id: Long): Boolean {
+        if (!appContext.canWritePublicDownloads()) return false
         val record = store.update(id) {
             it.copy(status = DownloadStatus.PENDING, reason = 0, bytesPerSecond = 0L, localUri = null)
         } ?: return false
@@ -204,6 +212,10 @@ class DownloadManagerClient(context: Context) {
 
 internal fun downloadPartsDirectory(context: Context, id: Long): File =
     File(context.filesDir, "segmented-downloads/$id")
+
+internal fun Context.canWritePublicDownloads(): Boolean =
+    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ||
+        ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
 
 internal fun guessMimeType(url: String): String? {
     val extension = MimeTypeMap.getFileExtensionFromUrl(url).lowercase()

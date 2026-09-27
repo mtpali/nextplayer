@@ -392,6 +392,7 @@
     <string name="invalid_download_url">یک لینک دانلود معتبر HTTP یا HTTPS وارد کنید.</string>
     <string name="download_started">دانلود شروع شد</string>
     <string name="download_failed">دانلود ناموفق بود</string>
+    <string name="downloads_storage_permission_required">برای ذخیره فایل‌ها در Download، دسترسی به حافظه را فعال کنید.</string>
     <string name="cannot_open_download">برنامه‌ای برای باز کردن این فایل پیدا نشد.</string>
     <string name="download_pending">در انتظار</string>
     <string name="download_running">در حال دانلود</string>
