@@ -27,7 +27,6 @@ fun EntryProviderScope<NavKey>.moreEntry(
     onPlayVideo: (String) -> Unit,
     onSettingsClick: () -> Unit,
     onTrashClick: () -> Unit,
-    onVaultClick: () -> Unit,
 ) {
     entry<MoreRoute> {
         val output = MoreViewModel.Output(
@@ -35,7 +34,6 @@ fun EntryProviderScope<NavKey>.moreEntry(
             playVideo = onPlayVideo,
             openSettings = onSettingsClick,
             openTrash = onTrashClick,
-            openVault = onVaultClick,
         )
         val viewModel = hiltViewModel<MoreViewModel, MoreViewModel.Factory>(
             creationCallback = { factory -> factory.create(output = output) },

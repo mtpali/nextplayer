@@ -1,7 +1,10 @@
 package dev.anilbeesetti.nextplayer.settings.screens.subtitle
 
 import android.content.Intent
+import android.graphics.Color
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,7 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -47,6 +50,8 @@ import dev.anilbeesetti.nextplayer.settings.composables.OptionsDialog
 import dev.anilbeesetti.nextplayer.settings.extensions.name
 import dev.anilbeesetti.nextplayer.settings.utils.LocalesHelper
 import java.nio.charset.Charset
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun SubtitlePreferencesScreen(
@@ -66,9 +71,17 @@ private fun SubtitlePreferencesScreenContent(
     state: SubtitlePreferencesUiState,
     onAction: (SubtitlePreferencesUiEvent) -> Unit,
 ) {
-    val languages = remember { listOf(Pair("None", "")) + LocalesHelper.getAvailableLocales() }
+    val languages by produceState(initialValue = listOf("None" to "")) {
+        value = withContext(Dispatchers.Default) { listOf("None" to "") + LocalesHelper.getAvailableLocales() }
+    }
     val charsetResource = stringArrayResource(id = R.array.charsets_list)
     val context = LocalContext.current
+    val fontPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let { onAction(SubtitlePreferencesUiEvent.ImportSubtitleFont(it)) }
+    }
+    val customAppearanceActive = state.preferences.subtitleFont == Font.CUSTOM ||
+        state.preferences.subtitleTextColor != Color.WHITE ||
+        state.preferences.subtitleBlackShadow
 
     val listFocusRequester = rememberTvListFocusRequester()
     Scaffold(
@@ -101,8 +114,8 @@ private fun SubtitlePreferencesScreenContent(
             ) {
                 ClickablePreferenceItem(
                     title = stringResource(id = R.string.preferred_subtitle_lang),
-                    description = LocalesHelper.getLocaleDisplayLanguage(state.preferences.preferredSubtitleLanguage)
-                        .takeIf { it.isNotBlank() } ?: stringResource(R.string.preferred_subtitle_lang_description),
+                    description = languages.firstOrNull { it.second.isNotEmpty() && it.second == state.preferences.preferredSubtitleLanguage }?.first
+                        ?: stringResource(R.string.preferred_subtitle_lang_description),
                     icon = NextIcons.Language,
                     onClick = { onAction(SubtitlePreferencesUiEvent.ShowDialog(SubtitlePreferenceDialog.SubtitleLanguageDialog)) },
                     isFirstItem = true,
@@ -130,7 +143,11 @@ private fun SubtitlePreferencesScreenContent(
                 )
                 ClickablePreferenceItem(
                     title = stringResource(id = R.string.subtitle_font),
-                    description = state.preferences.subtitleFont.name(),
+                    description = if (state.preferences.subtitleFont == Font.CUSTOM) {
+                        state.preferences.customSubtitleFontName ?: stringResource(R.string.subtitle_custom_font)
+                    } else {
+                        state.preferences.subtitleFont.name()
+                    },
                     icon = NextIcons.Font,
                     enabled = state.preferences.useSystemCaptionStyle.not(),
                     onClick = { onAction(SubtitlePreferencesUiEvent.ShowDialog(SubtitlePreferenceDialog.SubtitleFontDialog)) },
@@ -142,6 +159,19 @@ private fun SubtitlePreferencesScreenContent(
                     enabled = state.preferences.useSystemCaptionStyle.not(),
                     isChecked = state.preferences.subtitleTextBold,
                     onClick = { onAction(SubtitlePreferencesUiEvent.ToggleSubtitleTextBold) },
+                )
+                ClickablePreferenceItem(
+                    title = stringResource(R.string.subtitle_text_color),
+                    description = stringResource(
+                        if (state.preferences.subtitleTextColor == Color.YELLOW) {
+                            R.string.subtitle_color_yellow
+                        } else {
+                            R.string.subtitle_color_white
+                        },
+                    ),
+                    icon = NextIcons.Style,
+                    enabled = state.preferences.useSystemCaptionStyle.not(),
+                    onClick = { onAction(SubtitlePreferencesUiEvent.ShowDialog(SubtitlePreferenceDialog.SubtitleTextColorDialog)) },
                 )
                 PreferenceSlider(
                     title = stringResource(id = R.string.subtitle_text_size),
@@ -160,7 +190,31 @@ private fun SubtitlePreferencesScreenContent(
                         ) {
                             Icon(
                                 imageVector = NextIcons.History,
-                                contentDescription = stringResource(id = R.string.reset_seek_increment),
+                                contentDescription = stringResource(R.string.reset_subtitle_size),
+                            )
+                        }
+                    },
+                )
+                PreferenceSlider(
+                    title = stringResource(R.string.subtitle_vertical_position),
+                    description = stringResource(R.string.subtitle_vertical_position_desc, state.preferences.subtitleVerticalPosition),
+                    icon = NextIcons.Subtitle,
+                    value = state.preferences.subtitleVerticalPosition.toFloat(),
+                    valueRange = 0f..30f,
+                    onValueChange = { onAction(SubtitlePreferencesUiEvent.UpdateSubtitleVerticalPosition(it.toInt())) },
+                    trailingContent = {
+                        FilledIconButton(
+                            onClick = {
+                                onAction(
+                                    SubtitlePreferencesUiEvent.UpdateSubtitleVerticalPosition(
+                                        PlayerPreferences.DEFAULT_SUBTITLE_VERTICAL_POSITION,
+                                    ),
+                                )
+                            },
+                        ) {
+                            Icon(
+                                imageVector = NextIcons.History,
+                                contentDescription = stringResource(R.string.reset_subtitle_height),
                             )
                         }
                     },
@@ -174,10 +228,25 @@ private fun SubtitlePreferencesScreenContent(
                     onClick = { onAction(SubtitlePreferencesUiEvent.ToggleSubtitleBackground) },
                 )
                 PreferenceSwitch(
-                    title = stringResource(R.string.embedded_styles),
-                    description = stringResource(R.string.embedded_styles_desc),
+                    title = stringResource(R.string.subtitle_black_shadow),
+                    description = stringResource(R.string.subtitle_black_shadow_desc),
                     icon = NextIcons.Style,
-                    isChecked = state.preferences.applyEmbeddedStyles,
+                    enabled = state.preferences.useSystemCaptionStyle.not(),
+                    isChecked = state.preferences.subtitleBlackShadow,
+                    onClick = { onAction(SubtitlePreferencesUiEvent.ToggleSubtitleBlackShadow) },
+                )
+                PreferenceSwitch(
+                    title = stringResource(R.string.embedded_styles),
+                    description = stringResource(
+                        if (customAppearanceActive) {
+                            R.string.embedded_styles_custom_overridden
+                        } else {
+                            R.string.embedded_styles_desc
+                        },
+                    ),
+                    icon = NextIcons.Style,
+                    isChecked = state.preferences.applyEmbeddedStyles && !customAppearanceActive,
+                    enabled = !customAppearanceActive,
                     onClick = { onAction(SubtitlePreferencesUiEvent.ToggleApplyEmbeddedStyles) },
                     isLastItem = true,
                 )
@@ -209,12 +278,52 @@ private fun SubtitlePreferencesScreenContent(
                         text = stringResource(id = R.string.subtitle_font),
                         onDismissClick = { onAction(SubtitlePreferencesUiEvent.ShowDialog(null)) },
                     ) {
-                        items(Font.entries.toTypedArray()) {
+                        items(Font.entries.filter { it != Font.CUSTOM }) {
                             RadioTextButton(
                                 text = it.name(),
                                 selected = it == state.preferences.subtitleFont,
                                 onClick = {
                                     onAction(SubtitlePreferencesUiEvent.UpdateSubtitleFont(it))
+                                    onAction(SubtitlePreferencesUiEvent.ShowDialog(null))
+                                },
+                            )
+                        }
+                        if (state.preferences.customSubtitleFontId != null) {
+                            item {
+                                RadioTextButton(
+                                    text = state.preferences.customSubtitleFontName ?: stringResource(R.string.subtitle_custom_font),
+                                    selected = state.preferences.subtitleFont == Font.CUSTOM,
+                                    onClick = {
+                                        onAction(SubtitlePreferencesUiEvent.UpdateSubtitleFont(Font.CUSTOM))
+                                        onAction(SubtitlePreferencesUiEvent.ShowDialog(null))
+                                    },
+                                )
+                            }
+                        }
+                        item {
+                            RadioTextButton(
+                                text = stringResource(R.string.subtitle_select_font_file),
+                                selected = false,
+                                onClick = {
+                                    onAction(SubtitlePreferencesUiEvent.ShowDialog(null))
+                                    fontPicker.launch(arrayOf("*/*"))
+                                },
+                            )
+                        }
+                    }
+                }
+
+                SubtitlePreferenceDialog.SubtitleTextColorDialog -> {
+                    OptionsDialog(
+                        text = stringResource(R.string.subtitle_text_color),
+                        onDismissClick = { onAction(SubtitlePreferencesUiEvent.ShowDialog(null)) },
+                    ) {
+                        items(listOf(Color.WHITE to R.string.subtitle_color_white, Color.YELLOW to R.string.subtitle_color_yellow)) {
+                            RadioTextButton(
+                                text = stringResource(it.second),
+                                selected = it.first == state.preferences.subtitleTextColor,
+                                onClick = {
+                                    onAction(SubtitlePreferencesUiEvent.UpdateSubtitleTextColor(it.first))
                                     onAction(SubtitlePreferencesUiEvent.ShowDialog(null))
                                 },
                             )

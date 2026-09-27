@@ -16,7 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -35,6 +35,8 @@ import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
 import dev.anilbeesetti.nextplayer.core.ui.theme.NextPlayerTheme
 import dev.anilbeesetti.nextplayer.settings.composables.OptionsDialog
 import dev.anilbeesetti.nextplayer.settings.utils.LocalesHelper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun AudioPreferencesScreen(
@@ -54,7 +56,9 @@ private fun AudioPreferencesScreenContent(
     state: AudioPreferencesUiState,
     onAction: (AudioPreferencesUiEvent) -> Unit,
 ) {
-    val languages = remember { listOf(Pair("None", "")) + LocalesHelper.getAvailableLocales() }
+    val languages by produceState(initialValue = listOf("None" to "")) {
+        value = withContext(Dispatchers.Default) { listOf("None" to "") + LocalesHelper.getAvailableLocales() }
+    }
 
     val listFocusRequester = rememberTvListFocusRequester()
     Scaffold(
@@ -87,8 +91,8 @@ private fun AudioPreferencesScreenContent(
             ) {
                 ClickablePreferenceItem(
                     title = stringResource(id = R.string.preferred_audio_lang),
-                    description = LocalesHelper.getLocaleDisplayLanguage(state.preferences.preferredAudioLanguage)
-                        .takeIf { it.isNotBlank() } ?: stringResource(R.string.preferred_audio_lang_description),
+                    description = languages.firstOrNull { it.second.isNotEmpty() && it.second == state.preferences.preferredAudioLanguage }?.first
+                        ?: stringResource(R.string.preferred_audio_lang_description),
                     icon = NextIcons.Language,
                     onClick = { onAction(AudioPreferencesUiEvent.ShowDialog(AudioPreferenceDialog.AudioLanguageDialog)) },
                     isFirstItem = true,

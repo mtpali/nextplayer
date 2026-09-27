@@ -17,12 +17,4 @@ object LocalesHelper {
         }
     }
 
-    fun getLocaleDisplayLanguage(key: String): String {
-        return try {
-            Locale.getAvailableLocales().first { it.isO3Language == key }.displayLanguage
-        } catch (e: Exception) {
-            e.printStackTrace()
-            ""
-        }
-    }
 }

@@ -15,7 +15,6 @@ import dev.anilbeesetti.nextplayer.core.common.extensions.scanStorage
 import dev.anilbeesetti.nextplayer.core.common.storagePermission
 import dev.anilbeesetti.nextplayer.core.database.converter.UriListConverter
 import dev.anilbeesetti.nextplayer.core.database.dao.MediumStateDao
-import dev.anilbeesetti.nextplayer.core.database.dao.PlaylistDao
 import dev.anilbeesetti.nextplayer.core.media.services.MediaService
 import dev.anilbeesetti.nextplayer.core.media.services.MediaVideo
 import javax.inject.Inject
@@ -31,7 +30,6 @@ import kotlinx.coroutines.withContext
 
 class LocalMediaSynchronizer @Inject constructor(
     private val mediumStateDao: MediumStateDao,
-    private val playlistDao: PlaylistDao,
     private val imageLoader: ImageLoader,
     private val mediaService: MediaService,
     @ApplicationScope private val applicationScope: CoroutineScope,
@@ -67,8 +65,6 @@ class LocalMediaSynchronizer @Inject constructor(
         if (!context.hasStoragePermission()) return@withContext
 
         val currentMediaUris = media.mapTo(mutableSetOf()) { it.uri.toString() }
-
-        playlistDao.removeMissingLocalItems(currentMediaUris)
 
         val (wantedMediaStates, unwantedMediaStates) = mediumStateDao.getAll().first().partition {
             it.uriString in currentMediaUris || !ContentResolver.SCHEME_CONTENT.equals(it.uriString.toUri().scheme, ignoreCase = true)

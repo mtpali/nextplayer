@@ -15,23 +15,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -65,10 +59,8 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -94,7 +86,6 @@ import dev.anilbeesetti.nextplayer.core.model.ApplicationPreferences
 import dev.anilbeesetti.nextplayer.core.model.Folder
 import dev.anilbeesetti.nextplayer.core.model.MediaLayoutMode
 import dev.anilbeesetti.nextplayer.core.model.MediaViewMode
-import dev.anilbeesetti.nextplayer.core.model.PlaylistSummary
 import dev.anilbeesetti.nextplayer.core.model.Video
 import dev.anilbeesetti.nextplayer.core.ui.R
 import dev.anilbeesetti.nextplayer.core.ui.base.DataState
@@ -103,7 +94,6 @@ import dev.anilbeesetti.nextplayer.core.ui.components.BindTopLevelFab
 import dev.anilbeesetti.nextplayer.core.ui.components.CancelButton
 import dev.anilbeesetti.nextplayer.core.ui.components.LocalNavigationBottomPadding
 import dev.anilbeesetti.nextplayer.core.ui.components.NextDialog
-import dev.anilbeesetti.nextplayer.core.ui.components.NextOutlinedTextField
 import dev.anilbeesetti.nextplayer.core.ui.components.NextTopAppBar
 import dev.anilbeesetti.nextplayer.core.ui.components.TopLevelFabKey
 import dev.anilbeesetti.nextplayer.core.ui.components.rememberRestorableFocusState
@@ -123,11 +113,6 @@ import dev.anilbeesetti.nextplayer.feature.videopicker.composables.QuickSettings
 import dev.anilbeesetti.nextplayer.feature.videopicker.composables.RenameDialog
 import dev.anilbeesetti.nextplayer.feature.videopicker.composables.SelectionAction
 import dev.anilbeesetti.nextplayer.feature.videopicker.composables.TextIconToggleButton
-import dev.anilbeesetti.nextplayer.feature.videopicker.composables.vault.PinDotsIndicator
-import dev.anilbeesetti.nextplayer.feature.videopicker.composables.vault.PinKeypad
-import dev.anilbeesetti.nextplayer.feature.videopicker.composables.vault.VaultBiometricSetupDialog
-import dev.anilbeesetti.nextplayer.feature.videopicker.composables.vault.VaultProgressDialog
-import dev.anilbeesetti.nextplayer.feature.videopicker.screens.vault.VAULT_PIN_LENGTH
 import dev.anilbeesetti.nextplayer.feature.videopicker.state.SelectionItem
 import dev.anilbeesetti.nextplayer.feature.videopicker.state.rememberSelectionManager
 import dev.anilbeesetti.nextplayer.feature.videopicker.state.toSelectedFolder
@@ -325,13 +310,9 @@ internal fun MediaPickerScreenContent(
                 contentFocusRequester = focusState.requester,
                 showRenameAction = selectionManager.isSingleVideoSelected,
                 showInfoAction = selectionManager.isSingleVideoSelected,
-                showHideAction = selectionManager.selectionItems.isNotEmpty(),
                 onPlayAction = {
                     onAction(MediaPickerAction.PlaySelectedItems(selectionManager.selectionItems))
                     selectionManager.exitSelectionMode()
-                },
-                onAddToPlaylistAction = {
-                    onAction(MediaPickerAction.ShowAddToPlaylist(selectionManager.selectionItems))
                 },
                 onRenameAction = {
                     val selectedVideo = selectionManager.selectionItems.firstOrNull() ?: return@SelectionActionsSheet
@@ -355,10 +336,6 @@ internal fun MediaPickerScreenContent(
                 },
                 onMoveAction = {
                     onAction(MediaPickerAction.MoveSelectedItems(selectionManager.selectionItems))
-                    selectionManager.exitSelectionMode()
-                },
-                onHideAction = {
-                    onAction(MediaPickerAction.RequestHideSelectedItems(selectionManager.selectionItems))
                     selectionManager.exitSelectionMode()
                 },
                 onDeleteAction = {
@@ -487,35 +464,11 @@ internal fun MediaPickerScreenContent(
         )
     }
 
-    HideFlowDialogs(
-        hideFlow = state.hideFlow,
-        onConfirmHide = { onAction(MediaPickerAction.ConfirmHidePendingItems) },
-        onSetPinAndHide = { onAction(MediaPickerAction.SetVaultPinAndHide(it)) },
-        onBiometricSetupComplete = { onAction(MediaPickerAction.CompleteBiometricSetup(it)) },
-        onDismiss = { onAction(MediaPickerAction.DismissHideFlow) },
-    )
-
     (state.transferFlow as? TransferFlowState.Processing)?.let { transfer ->
         TransferProgressDialog(
             mode = transfer.mode,
             progress = transfer.progress,
             onCancel = { onAction(MediaPickerAction.CancelTransfer) },
-        )
-    }
-
-    if (state.addToPlaylistState.isVisible) {
-        PlaylistTargetDialog(
-            playlists = state.playlists,
-            state = state.addToPlaylistState,
-            onDismissRequest = { onAction(MediaPickerAction.DismissAddToPlaylist) },
-            onPlaylistSelected = {
-                onAction(MediaPickerAction.AddSelectionToPlaylist(it))
-                selectionManager.exitSelectionMode()
-            },
-            onCreatePlaylist = {
-                onAction(MediaPickerAction.CreatePlaylistWithSelection(it))
-                selectionManager.exitSelectionMode()
-            },
         )
     }
 }
@@ -688,377 +641,6 @@ private fun DeleteConfirmationDialog(
     )
 }
 
-@Composable
-private fun HideFlowDialogs(
-    hideFlow: HideFlowState,
-    onConfirmHide: () -> Unit,
-    onSetPinAndHide: (String) -> Unit,
-    onBiometricSetupComplete: (Boolean) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    when (hideFlow) {
-        HideFlowState.Idle -> Unit
-
-        HideFlowState.Processing -> {
-            VaultProgressDialog(message = stringResource(R.string.hiding_videos_in_progress))
-        }
-
-        is HideFlowState.ConfirmHide -> {
-            val count = hideFlow.items.size
-            NextDialog(
-                onDismissRequest = onDismiss,
-                title = {
-                    Text(
-                        text = if (count == 1) {
-                            stringResource(R.string.hide_one_video_confirmation)
-                        } else {
-                            stringResource(R.string.hide_videos_confirmation, count)
-                        },
-                    )
-                },
-                content = { Text(text = stringResource(R.string.hide_video_info)) },
-                confirmButton = {
-                    TextButton(onClick = onConfirmHide) {
-                        Text(text = stringResource(R.string.hide))
-                    }
-                },
-                dismissButton = { CancelButton(onClick = onDismiss) },
-            )
-        }
-
-        is HideFlowState.SetupPin -> {
-            SetupVaultPinDialog(
-                onDismiss = onDismiss,
-                onPinConfirmed = onSetPinAndHide,
-            )
-        }
-
-        HideFlowState.BiometricSetup -> VaultBiometricSetupDialog(onComplete = onBiometricSetupComplete)
-    }
-}
-
-@Composable
-private fun SetupVaultPinDialog(
-    onDismiss: () -> Unit,
-    onPinConfirmed: (String) -> Unit,
-) {
-    var firstPin: String? by rememberSaveable { mutableStateOf(null) }
-    var currentPin by rememberSaveable { mutableStateOf("") }
-    var errorCount by rememberSaveable { mutableStateOf(0) }
-
-    val isConfirmStep = firstPin != null
-    val showError = errorCount > 0
-
-    val context = LocalContext.current
-    val isTv = remember { context.isTelevision }
-
-    val onDigit: (Char) -> Unit = { digit ->
-        if (currentPin.length < VAULT_PIN_LENGTH) {
-            currentPin += digit
-            if (currentPin.length == VAULT_PIN_LENGTH) {
-                val pinJustEntered = currentPin
-                if (!isConfirmStep) {
-                    firstPin = pinJustEntered
-                    currentPin = ""
-                    errorCount = 0
-                } else if (pinJustEntered == firstPin) {
-                    onPinConfirmed(pinJustEntered)
-                } else {
-                    errorCount++
-                    currentPin = ""
-                }
-            }
-        }
-    }
-    val onBackspace: () -> Unit = {
-        if (currentPin.isNotEmpty()) currentPin = currentPin.dropLast(1)
-    }
-
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = !isTv),
-    ) {
-        Surface(
-            modifier = if (isTv) Modifier.fillMaxWidth(0.72f) else Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.extraLarge,
-            color = MaterialTheme.colorScheme.surfaceContainer,
-        ) {
-            if (isTv) {
-                // Landscape TV: info on the left, keypad on the right so it fits a short screen.
-                Row(
-                    modifier = Modifier.padding(24.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    SetupPinHeader(
-                        modifier = Modifier.weight(1f),
-                        isConfirmStep = isConfirmStep,
-                        filledCount = currentPin.length,
-                        showError = showError,
-                    )
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        PinKeypad(
-                            modifier = Modifier.widthIn(max = 300.dp),
-                            onDigit = onDigit,
-                            onBackspace = onBackspace,
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        CancelButton(onClick = onDismiss)
-                    }
-                }
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 28.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    SetupPinHeader(
-                        isConfirmStep = isConfirmStep,
-                        filledCount = currentPin.length,
-                        showError = showError,
-                    )
-                    Spacer(modifier = Modifier.height(32.dp))
-                    PinKeypad(
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        onDigit = onDigit,
-                        onBackspace = onBackspace,
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    CancelButton(onClick = onDismiss)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SetupPinHeader(
-    isConfirmStep: Boolean,
-    filledCount: Int,
-    showError: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        // Lock icon — matches the vault PIN screen's icon box
-        Box(
-            modifier = Modifier
-                .clip(MaterialTheme.shapes.large)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                .padding(20.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = NextIcons.Lock,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(32.dp),
-            )
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            text = if (isConfirmStep) {
-                stringResource(R.string.confirm_vault_pin)
-            } else {
-                stringResource(R.string.set_vault_pin)
-            },
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = if (isConfirmStep) {
-                stringResource(R.string.confirm_vault_pin_description)
-            } else {
-                stringResource(R.string.set_vault_pin_description)
-            },
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-        PinDotsIndicator(
-            filledCount = filledCount,
-            error = showError,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        if (showError) {
-            Text(
-                text = stringResource(R.string.pins_do_not_match),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error,
-                textAlign = TextAlign.Center,
-            )
-        }
-    }
-}
-
-@Composable
-private fun PlaylistTargetDialog(
-    playlists: List<PlaylistSummary>,
-    state: AddToPlaylistState,
-    onDismissRequest: () -> Unit,
-    onPlaylistSelected: (Long) -> Unit,
-    onCreatePlaylist: (String) -> Unit,
-) {
-    var showCreateDialog by rememberSaveable { mutableStateOf(false) }
-
-    if (showCreateDialog) {
-        var name by rememberSaveable { mutableStateOf("") }
-        val trimmedName = name.trim()
-        NextDialog(
-            onDismissRequest = {
-                if (!state.isSaving) showCreateDialog = false
-            },
-            title = {
-                Text(stringResource(R.string.create_new_playlist))
-            },
-            content = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    NextOutlinedTextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        label = {
-                            Text(stringResource(R.string.playlist_name))
-                        },
-                        enabled = !state.isSaving,
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    state.errorRes?.let { errorRes ->
-                        Text(
-                            text = stringResource(errorRes),
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = { onCreatePlaylist(trimmedName) },
-                    enabled = !state.isSaving && state.hasVideos && trimmedName.isNotEmpty(),
-                    modifier = Modifier.tvFocusRing(),
-                ) {
-                    Text(stringResource(R.string.create))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { if (!state.isSaving) showCreateDialog = false },
-                    enabled = !state.isSaving,
-                    modifier = Modifier.tvFocusRing(),
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
-            },
-        )
-        return
-    }
-
-    NextDialog(
-        onDismissRequest = {
-            if (!state.isSaving) onDismissRequest()
-        },
-        title = {
-            Text(stringResource(R.string.choose_playlist))
-        },
-        content = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(
-                    onClick = { showCreateDialog = true },
-                    enabled = !state.isSaving,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .tvFocusRing(),
-                ) {
-                    Icon(NextIcons.Add, contentDescription = null)
-                    Spacer(Modifier.size(8.dp))
-                    Text(
-                        text = stringResource(R.string.create_new_playlist),
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-                Text(
-                    text = stringResource(R.string.existing_playlists),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-                LazyColumn(modifier = Modifier.heightIn(max = 320.dp)) {
-                    if (playlists.isEmpty()) {
-                        item {
-                            Text(
-                                text = stringResource(R.string.no_playlists),
-                                modifier = Modifier.padding(12.dp),
-                            )
-                        }
-                    }
-                    items(playlists, key = PlaylistSummary::id) { playlist ->
-                        TextButton(
-                            onClick = { onPlaylistSelected(playlist.id) },
-                            enabled = !state.isSaving && state.hasVideos,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .tvFocusRing(),
-                        ) {
-                            Icon(
-                                imageVector = NextIcons.Playlist,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                            )
-                            Spacer(Modifier.size(8.dp))
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                horizontalAlignment = Alignment.Start,
-                            ) {
-                                Text(
-                                    text = playlist.name,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                                Text(
-                                    text = pluralStringResource(
-                                        R.plurals.playlist_video_count,
-                                        playlist.itemCount,
-                                        playlist.itemCount,
-                                    ),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                    }
-                }
-                state.errorRes?.let { errorRes ->
-                    Text(
-                        text = stringResource(errorRes),
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-                if (state.isSaving) {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(
-                onClick = onDismissRequest,
-                enabled = !state.isSaving,
-                modifier = Modifier.tvFocusRing(),
-            ) {
-                Text(stringResource(R.string.cancel))
-            }
-        },
-    )
-}
-
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SelectionActionsSheet(
@@ -1067,15 +649,12 @@ private fun SelectionActionsSheet(
     contentFocusRequester: FocusRequester,
     showRenameAction: Boolean,
     showInfoAction: Boolean,
-    showHideAction: Boolean,
     onPlayAction: () -> Unit,
-    onAddToPlaylistAction: () -> Unit,
     onRenameAction: () -> Unit,
     onShareAction: () -> Unit,
     onCopyAction: () -> Unit,
     onMoveAction: () -> Unit,
     onInfoAction: () -> Unit,
-    onHideAction: () -> Unit,
     onDeleteAction: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -1123,12 +702,6 @@ private fun SelectionActionsSheet(
                     title = stringResource(R.string.play),
                     onClick = onPlayAction,
                 )
-                SelectionAction(
-                    isTv = isTv,
-                    imageVector = NextIcons.PlaylistAdd,
-                    title = stringResource(R.string.add_to_playlist),
-                    onClick = onAddToPlaylistAction,
-                )
                 if (showRenameAction) {
                     SelectionAction(
                         isTv = isTv,
@@ -1161,14 +734,6 @@ private fun SelectionActionsSheet(
                         imageVector = NextIcons.Info,
                         title = stringResource(id = R.string.info),
                         onClick = onInfoAction,
-                    )
-                }
-                if (showHideAction) {
-                    SelectionAction(
-                        isTv = isTv,
-                        imageVector = NextIcons.HideSource,
-                        title = stringResource(id = R.string.hide),
-                        onClick = onHideAction,
                     )
                 }
                 SelectionAction(

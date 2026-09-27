@@ -33,10 +33,6 @@
     <string name="folder_duration">ระยะเวลาของโฟลเดอร์</string>
     <string name="location">ตำแหน่ง</string>
     <string name="navigate_up">เลื่อนขึ้น</string>
-    <string name="no_connections_title">ยังไม่มีการเชื่อมต่อ</string>
-    <string name="no_connections_description">เพิ่มการเชื่อมต่อแบบ SMB, FTP หรือ WebDAV สำหรับค้นหาและเล่นวิดิโอจากเครือข่ายของคุณ</string>
-    <string name="empty_folder">โฟลเดอร์นี้ว่างเปล่า</string>
-    <string name="failed_to_load_folder">ไม่สามารถโหลดตำแหน่งนี้ได้</string>
     <string name="retry">ลองใหม่</string>
     <string name="edit">แก้ไข</string>
     <string name="copy">คัดลอก / เคลื่อนย้าย</string>

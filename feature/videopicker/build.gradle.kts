@@ -46,9 +46,6 @@ dependencies {
     implementation(project(":core:model"))
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.biometric)
-    implementation(libs.google.android.material)
 
     // Compose
     implementation(libs.androidx.activity.compose)
