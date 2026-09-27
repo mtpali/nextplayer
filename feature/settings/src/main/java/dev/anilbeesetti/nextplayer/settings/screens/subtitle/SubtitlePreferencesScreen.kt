@@ -75,10 +75,9 @@ private fun SubtitlePreferencesScreenContent(
     val fontPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let { onAction(SubtitlePreferencesUiEvent.ImportSubtitleFont(it)) }
     }
-    val customAppearanceActive = !state.preferences.useSystemCaptionStyle &&
-        (state.preferences.subtitleFont == Font.CUSTOM ||
-            state.preferences.subtitleTextColor != Color.WHITE ||
-            state.preferences.subtitleBlackOutline)
+    val customAppearanceActive = state.preferences.subtitleFont == Font.CUSTOM ||
+        state.preferences.subtitleTextColor != Color.WHITE ||
+        state.preferences.subtitleBlackOutline
 
     val listFocusRequester = rememberTvListFocusRequester()
     Scaffold(
@@ -187,7 +186,31 @@ private fun SubtitlePreferencesScreenContent(
                         ) {
                             Icon(
                                 imageVector = NextIcons.History,
-                                contentDescription = stringResource(id = R.string.reset_seek_increment),
+                                contentDescription = stringResource(R.string.reset_subtitle_size),
+                            )
+                        }
+                    },
+                )
+                PreferenceSlider(
+                    title = stringResource(R.string.subtitle_vertical_position),
+                    description = stringResource(R.string.subtitle_vertical_position_desc, state.preferences.subtitleVerticalPosition),
+                    icon = NextIcons.Subtitle,
+                    value = state.preferences.subtitleVerticalPosition.toFloat(),
+                    valueRange = 0f..30f,
+                    onValueChange = { onAction(SubtitlePreferencesUiEvent.UpdateSubtitleVerticalPosition(it.toInt())) },
+                    trailingContent = {
+                        FilledIconButton(
+                            onClick = {
+                                onAction(
+                                    SubtitlePreferencesUiEvent.UpdateSubtitleVerticalPosition(
+                                        PlayerPreferences.DEFAULT_SUBTITLE_VERTICAL_POSITION,
+                                    ),
+                                )
+                            },
+                        ) {
+                            Icon(
+                                imageVector = NextIcons.History,
+                                contentDescription = stringResource(R.string.reset_subtitle_height),
                             )
                         }
                     },

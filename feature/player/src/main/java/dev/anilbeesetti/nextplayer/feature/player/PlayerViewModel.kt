@@ -60,6 +60,22 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
+    fun updateSubtitleTextSize(value: Int) {
+        viewModelScope.launch {
+            preferencesRepository.updatePlayerPreferences {
+                it.copy(subtitleTextSize = value.coerceIn(10, 60), useSystemCaptionStyle = false)
+            }
+        }
+    }
+
+    fun updateSubtitleVerticalPosition(value: Int) {
+        viewModelScope.launch {
+            preferencesRepository.updatePlayerPreferences {
+                it.copy(subtitleVerticalPosition = value.coerceIn(0, 30))
+            }
+        }
+    }
+
     fun updateVideoContentScale(contentScale: VideoContentScale) {
         viewModelScope.launch {
             preferencesRepository.updatePlayerPreferences { it.copy(playerVideoZoom = contentScale) }

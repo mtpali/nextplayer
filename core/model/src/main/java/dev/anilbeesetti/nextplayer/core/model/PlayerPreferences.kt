@@ -51,6 +51,7 @@ data class PlayerPreferences(
     val preferredSubtitleLanguage: String = "",
     val subtitleTextEncoding: String = "",
     val subtitleTextSize: Int = DEFAULT_SUBTITLE_TEXT_SIZE,
+    val subtitleVerticalPosition: Int = DEFAULT_SUBTITLE_VERTICAL_POSITION,
     val subtitleBackground: Boolean = false,
     val subtitleFont: Font = Font.DEFAULT,
     val customSubtitleFontId: String? = null,
@@ -67,6 +68,7 @@ data class PlayerPreferences(
         const val DEFAULT_VOLUME_GESTURE_SENSITIVITY = 0.50f
         const val DEFAULT_BRIGHTNESS_GESTURE_SENSITIVITY = 0.50f
         const val DEFAULT_SUBTITLE_TEXT_SIZE = 20
+        const val DEFAULT_SUBTITLE_VERTICAL_POSITION = 8 // Percent of the viewport above the bottom edge.
         const val DEFAULT_SUBTITLE_TEXT_COLOR = -1 // Opaque white.
         const val DEFAULT_CONTROLLER_AUTO_HIDE_TIMEOUT = 4
     }

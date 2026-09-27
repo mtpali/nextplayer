@@ -128,6 +128,14 @@
     <string name="subtitle_text_bold_desc">به‌کارگیری متن درشت برای زیرنویس</string>
     <string name="monospace">فونت Monospace</string>
     <string name="subtitle_text_size">اندازه زیرنویس</string>
+    <string name="subtitle_vertical_position">ارتفاع زیرنویس</string>
+    <string name="subtitle_vertical_position_desc">%1$d%% بالاتر از پایین صفحه</string>
+    <string name="subtitle_adjust_in_player">تنظیم اندازه و موقعیت</string>
+    <string name="subtitle_adjustments">ظاهر زیرنویس</string>
+    <string name="subtitle_size_value">%1$d sp</string>
+    <string name="subtitle_size_overrides_system">تغییر اندازه، سبک زیرنویس برنامه را فعال می‌کند</string>
+    <string name="reset_subtitle_size">بازنشانی اندازه زیرنویس</string>
+    <string name="reset_subtitle_height">بازنشانی ارتفاع زیرنویس</string>
     <string name="subtitle_desc">ظاهر زیرنویس، گزینه های پخش</string>
     <string name="subtitle_background_desc">نمایش پس‌زمینه زیرنویس</string>
     <string name="subtitle_background">پس‌زمینه زیرنویس</string>

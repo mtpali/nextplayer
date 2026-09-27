@@ -22,7 +22,15 @@ fun BoxScope.OverlayShowView(
     onVideoDecoderModeSelected: (DecoderMode) -> Unit = {},
     onAudioDecoderModeSelected: (DecoderMode) -> Unit = {},
     onSelectSubtitleClick: () -> Unit = {},
+    onAdjustSubtitleClick: () -> Unit = {},
     onSubtitleOptionEvent: (SubtitleOptionsEvent) -> Unit = {},
+    subtitleTextSize: Int,
+    subtitleVerticalPosition: Int,
+    useSystemCaptionStyle: Boolean,
+    onSubtitleTextSizePreview: (Int) -> Unit,
+    onSubtitleVerticalPositionPreview: (Int) -> Unit,
+    onSubtitleTextSizeSelected: (Int) -> Unit,
+    onSubtitleVerticalPositionSelected: (Int) -> Unit,
     onVideoContentScaleChanged: (VideoContentScale) -> Unit = {},
 ) {
     Box(
@@ -55,7 +63,20 @@ fun BoxScope.OverlayShowView(
         show = overlayView == OverlayView.SUBTITLE_SELECTOR,
         player = player,
         onSelectSubtitleClick = onSelectSubtitleClick,
+        onAdjustSubtitleClick = onAdjustSubtitleClick,
         onEvent = onSubtitleOptionEvent,
+        onDismiss = onDismiss,
+    )
+
+    SubtitleAppearanceView(
+        show = overlayView == OverlayView.SUBTITLE_APPEARANCE,
+        textSize = subtitleTextSize,
+        verticalPosition = subtitleVerticalPosition,
+        useSystemCaptionStyle = useSystemCaptionStyle,
+        onTextSizePreview = onSubtitleTextSizePreview,
+        onVerticalPositionPreview = onSubtitleVerticalPositionPreview,
+        onTextSizeSelected = onSubtitleTextSizeSelected,
+        onVerticalPositionSelected = onSubtitleVerticalPositionSelected,
         onDismiss = onDismiss,
     )
 
@@ -84,6 +105,7 @@ enum class OverlayView {
     DECODER_SELECTOR,
     AUDIO_SELECTOR,
     SUBTITLE_SELECTOR,
+    SUBTITLE_APPEARANCE,
     PLAYBACK_SPEED,
     VIDEO_CONTENT_SCALE,
     PLAYLIST,

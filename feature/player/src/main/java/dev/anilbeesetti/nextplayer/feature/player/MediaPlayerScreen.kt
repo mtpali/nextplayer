@@ -206,6 +206,14 @@ fun MediaPlayerScreen(
     }
 
     var overlayView by remember { mutableStateOf<OverlayView?>(null) }
+    var previewSubtitleTextSize by remember { mutableIntStateOf(playerPreferences.subtitleTextSize) }
+    var previewSubtitleVerticalPosition by remember { mutableIntStateOf(playerPreferences.subtitleVerticalPosition) }
+    LaunchedEffect(playerPreferences.subtitleTextSize) {
+        previewSubtitleTextSize = playerPreferences.subtitleTextSize
+    }
+    LaunchedEffect(playerPreferences.subtitleVerticalPosition) {
+        previewSubtitleVerticalPosition = playerPreferences.subtitleVerticalPosition
+    }
 
     val context = LocalContext.current
     val isTv = remember { context.isTelevision }
@@ -291,11 +299,14 @@ fun MediaPlayerScreen(
                     videoZoomAndContentScaleState = videoZoomAndContentScaleState,
                     volumeAndBrightnessGestureState = volumeAndBrightnessGestureState,
                     subtitleConfiguration = SubtitleConfiguration(
-                        useSystemCaptionStyle = playerPreferences.useSystemCaptionStyle,
+                        useSystemCaptionStyle = playerPreferences.useSystemCaptionStyle &&
+                            !(overlayView == OverlayView.SUBTITLE_APPEARANCE &&
+                                previewSubtitleTextSize != playerPreferences.subtitleTextSize),
                         showBackground = playerPreferences.subtitleBackground,
                         font = playerPreferences.subtitleFont,
                         customFontId = playerPreferences.customSubtitleFontId,
-                        textSize = playerPreferences.subtitleTextSize,
+                        textSize = previewSubtitleTextSize,
+                        verticalPosition = previewSubtitleVerticalPosition,
                         textBold = playerPreferences.subtitleTextBold,
                         textColor = playerPreferences.subtitleTextColor,
                         blackOutline = playerPreferences.subtitleBlackOutline,
@@ -535,7 +546,15 @@ fun MediaPlayerScreen(
                 onVideoDecoderModeSelected = decoderState::switchVideoTo,
                 onAudioDecoderModeSelected = decoderState::switchAudioTo,
                 onSelectSubtitleClick = onSelectSubtitleClick,
+                onAdjustSubtitleClick = { overlayView = OverlayView.SUBTITLE_APPEARANCE },
                 onSubtitleOptionEvent = viewModel::onSubtitleOptionEvent,
+                subtitleTextSize = previewSubtitleTextSize,
+                subtitleVerticalPosition = previewSubtitleVerticalPosition,
+                useSystemCaptionStyle = playerPreferences.useSystemCaptionStyle,
+                onSubtitleTextSizePreview = { previewSubtitleTextSize = it },
+                onSubtitleVerticalPositionPreview = { previewSubtitleVerticalPosition = it },
+                onSubtitleTextSizeSelected = viewModel::updateSubtitleTextSize,
+                onSubtitleVerticalPositionSelected = viewModel::updateSubtitleVerticalPosition,
                 onVideoContentScaleChanged = { videoZoomAndContentScaleState.onVideoContentScaleChanged(it) },
             )
         }

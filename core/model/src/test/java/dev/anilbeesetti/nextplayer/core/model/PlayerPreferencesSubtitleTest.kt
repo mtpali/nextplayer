@@ -16,6 +16,7 @@ class PlayerPreferencesSubtitleTest {
 
         assertEquals(Font.SERIF, preferences.subtitleFont)
         assertEquals(24, preferences.subtitleTextSize)
+        assertEquals(PlayerPreferences.DEFAULT_SUBTITLE_VERTICAL_POSITION, preferences.subtitleVerticalPosition)
         assertEquals(PlayerPreferences.DEFAULT_SUBTITLE_TEXT_COLOR, preferences.subtitleTextColor)
         assertFalse(preferences.subtitleBlackOutline)
         assertNull(preferences.customSubtitleFontId)
@@ -29,6 +30,7 @@ class PlayerPreferencesSubtitleTest {
             customSubtitleFontName = "My Font.ttf",
             subtitleTextColor = 0xFFFFFF00.toInt(),
             subtitleBlackOutline = true,
+            subtitleVerticalPosition = 15,
         )
 
         val encoded = Json.encodeToString(PlayerPreferences.serializer(), preferences)

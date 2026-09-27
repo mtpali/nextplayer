@@ -135,6 +135,14 @@
     <string name="subtitle_text_bold">Bold subtitle text</string>
     <string name="subtitle_text_bold_desc">Use bold text for subtitle</string>
     <string name="subtitle_text_size">Subtitle text size</string>
+    <string name="subtitle_vertical_position">Subtitle height</string>
+    <string name="subtitle_vertical_position_desc">%1$d%% above the bottom of the screen</string>
+    <string name="subtitle_adjust_in_player">Adjust size and position</string>
+    <string name="subtitle_adjustments">Subtitle appearance</string>
+    <string name="subtitle_size_value">%1$d sp</string>
+    <string name="subtitle_size_overrides_system">Changing the size switches to app subtitle styling</string>
+    <string name="reset_subtitle_size">Reset subtitle size</string>
+    <string name="reset_subtitle_height">Reset subtitle height</string>
     <string name="subtitle_desc">Subtitle appearance, playback options</string>
     <string name="subtitle_background">Subtitle background</string>
     <string name="subtitle_background_desc">Enable background to subtitle text</string>

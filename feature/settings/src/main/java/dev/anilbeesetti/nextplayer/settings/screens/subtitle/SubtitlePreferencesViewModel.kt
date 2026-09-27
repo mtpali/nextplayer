@@ -68,6 +68,7 @@ class SubtitlePreferencesViewModel @AssistedInject constructor(
             is SubtitlePreferencesUiEvent.ImportSubtitleFont -> importSubtitleFont(action.uri)
             is SubtitlePreferencesUiEvent.ToggleSubtitleTextBold -> toggleSubtitleTextBold()
             is SubtitlePreferencesUiEvent.UpdateSubtitleFontSize -> updateSubtitleFontSize(action.value)
+            is SubtitlePreferencesUiEvent.UpdateSubtitleVerticalPosition -> updateSubtitleVerticalPosition(action.value)
             is SubtitlePreferencesUiEvent.UpdateSubtitleTextColor -> updateSubtitleTextColor(action.value)
             is SubtitlePreferencesUiEvent.ToggleSubtitleBlackOutline -> toggleSubtitleBlackOutline()
             is SubtitlePreferencesUiEvent.ToggleSubtitleBackground -> toggleSubtitleBackground()
@@ -150,7 +151,15 @@ class SubtitlePreferencesViewModel @AssistedInject constructor(
     private fun updateSubtitleFontSize(value: Int) {
         viewModelScope.launch {
             preferencesRepository.updatePlayerPreferences {
-                it.copy(subtitleTextSize = value)
+                it.copy(subtitleTextSize = value.coerceIn(10, 60))
+            }
+        }
+    }
+
+    private fun updateSubtitleVerticalPosition(value: Int) {
+        viewModelScope.launch {
+            preferencesRepository.updatePlayerPreferences {
+                it.copy(subtitleVerticalPosition = value.coerceIn(0, 30))
             }
         }
     }
@@ -206,6 +215,7 @@ sealed interface SubtitlePreferencesUiEvent {
     data class ImportSubtitleFont(val uri: Uri) : SubtitlePreferencesUiEvent
     data object ToggleSubtitleTextBold : SubtitlePreferencesUiEvent
     data class UpdateSubtitleFontSize(val value: Int) : SubtitlePreferencesUiEvent
+    data class UpdateSubtitleVerticalPosition(val value: Int) : SubtitlePreferencesUiEvent
     data class UpdateSubtitleTextColor(val value: Int) : SubtitlePreferencesUiEvent
     data object ToggleSubtitleBlackOutline : SubtitlePreferencesUiEvent
     data object ToggleSubtitleBackground : SubtitlePreferencesUiEvent
