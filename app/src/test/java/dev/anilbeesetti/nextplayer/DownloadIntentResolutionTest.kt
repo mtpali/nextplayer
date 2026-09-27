@@ -21,6 +21,7 @@ class DownloadIntentResolutionTest {
 
         assertTrue(handlersFor(intent).any { it.endsWith(".PlayerActivity") })
         assertFalse(handlersFor(intent).any { it.endsWith(".DownloadRequestActivity") })
+        assertFalse(handlersFor(intent).any { it.endsWith(".OpenDownloadLinkActivity") })
     }
 
     @Test
@@ -31,13 +32,15 @@ class DownloadIntentResolutionTest {
         }
 
         assertTrue(handlersFor(intent).any { it.endsWith(".DownloadRequestActivity") })
+        assertFalse(handlersFor(intent).any { it.endsWith(".OpenDownloadLinkActivity") })
     }
 
     @Test
-    fun `ordinary untyped web link does not identify download activity as a browser`() {
+    fun `ordinary untyped browser link still offers the legacy link handoff`() {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://example.com/page"))
 
         assertFalse(handlersFor(intent).any { it.endsWith(".DownloadRequestActivity") })
+        assertTrue(handlersFor(intent).any { it.endsWith(".OpenDownloadLinkActivity") })
     }
 
     @Test

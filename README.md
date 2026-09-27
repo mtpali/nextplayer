@@ -16,6 +16,7 @@ The shipped APK is intentionally limited to `armeabi-v7a` (ARMv7).
 - To choose Player in Firefox's download dialog, enable Settings → Download Settings →
   Manage downloads with another app. The download activity accepts typed HTTP(S)
   links without appearing as a handler for files already saved on the device.
+  Untyped links opened from other browsers still use the separate link handoff.
 - Capture the visible video frame from the player controls and save it under `Pictures/Player`.
 - Use the supplied Player launcher icon without adaptive-icon zoom.
 - Show Mobile Tina Instagram and developer Telegram destinations in a modern About screen.
