@@ -8,6 +8,9 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.longClick
@@ -63,7 +66,7 @@ class MediaPickerScreenTest {
         composeRule.onNodeWithText("Clip").performTouchInput { longClick() }
         composeRule.onNodeWithText("Delete").performClick()
         composeRule.onNode(isToggleable()).performClick()
-        composeRule.onNodeWithText("Delete").performClick()
+        composeRule.onNode(hasText("Delete") and hasAnyAncestor(isDialog())).performClick()
 
         assertEquals(
             listOf(MediaPickerAction.DeleteSelectedItems(setOf(video.toSelectedVideo()), permanently = true)),
