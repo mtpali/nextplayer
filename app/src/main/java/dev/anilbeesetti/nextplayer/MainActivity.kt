@@ -78,7 +78,6 @@ import dev.anilbeesetti.nextplayer.navigation.mediaNavGraph
 import dev.anilbeesetti.nextplayer.navigation.moreNavGraph
 import dev.anilbeesetti.nextplayer.navigation.navigationTransition
 import dev.anilbeesetti.nextplayer.navigation.networkNavGraph
-import dev.anilbeesetti.nextplayer.navigation.playlistNavGraph
 import dev.anilbeesetti.nextplayer.navigation.rememberTopLevelNavState
 import dev.anilbeesetti.nextplayer.navigation.settingsNavGraph
 import javax.inject.Inject
@@ -135,13 +134,11 @@ class MainActivity : FragmentActivity() {
                     val navState = rememberTopLevelNavState()
 
                     val mediaStack = navState.backStacks.getValue(TopLevelDestination.MEDIA.route)
-                    val playlistStack = navState.backStacks.getValue(TopLevelDestination.PLAYLISTS.route)
                     val networkStack = navState.backStacks.getValue(TopLevelDestination.NETWORK.route)
                     val moreStack = navState.backStacks.getValue(TopLevelDestination.MORE.route)
 
                     val provider = entryProvider {
                         mediaNavGraph(context = this@MainActivity, backStack = mediaStack)
-                        playlistNavGraph(context = this@MainActivity, backStack = playlistStack)
                         networkNavGraph(context = this@MainActivity, backStack = networkStack)
                         moreNavGraph(context = this@MainActivity, backStack = moreStack)
                         settingsNavGraph(backStack = navState.currentStack)

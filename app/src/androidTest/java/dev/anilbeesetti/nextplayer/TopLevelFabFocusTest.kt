@@ -4,12 +4,10 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
@@ -44,24 +42,21 @@ class TopLevelFabFocusTest {
     fun homeFabUpReturnsToContent() = checkFabUp(tabIndex = 0)
 
     @Test
-    fun playlistsFabUpReturnsToContent() = checkFabUp(tabIndex = 1)
+    fun networkFabUpReturnsToContent() = checkFabUp(tabIndex = 1)
 
     @Test
-    fun moreFabUpReturnsToContent() = checkFabUp(tabIndex = 3)
+    fun moreFabUpReturnsToContent() = checkFabUp(tabIndex = 2)
 
     @Test
-    fun openingMoreFocusesItsFirstActionEvenAfterSwitchingTabs() {
-        composeRule.onAllNodes(tab)[3].performClick()
-        composeRule.onNodeWithText("Vault").assertIsFocused()
-        composeRule.onNodeWithText("Pick file").requestFocus()
+    fun openingMoreKeepsFabUpInItsContentAfterSwitchingTabs() {
+        composeRule.onAllNodes(tab)[2].performClick()
         composeRule.onAllNodes(tab)[0].performClick()
-        composeRule.onAllNodes(tab)[3].performClick()
-        composeRule.onNodeWithText("Vault").assertIsFocused()
+        checkFabUp(2)
     }
 
     @Test
     fun switchingTabsKeepsFabUpInTheCurrentScreen() {
-        listOf(2, 0, 3, 1, 0, 2, 3).forEach(::checkFabUp)
+        listOf(1, 0, 2, 1, 0, 2).forEach(::checkFabUp)
     }
 
     private fun checkFabUp(tabIndex: Int) {

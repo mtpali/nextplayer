@@ -26,7 +26,6 @@ fun EntryProviderScope<NavKey>.mediaPickerEntry(
     onFolderClick: (folderPath: String) -> Unit,
     onSettingsClick: () -> Unit,
     onSearchClick: () -> Unit,
-    onVaultClick: () -> Unit,
 ) {
     entry<MediaPickerRoute> { key ->
         val output = MediaPickerViewModel.Output(
@@ -36,7 +35,6 @@ fun EntryProviderScope<NavKey>.mediaPickerEntry(
             openFolder = onFolderClick,
             openSettings = onSettingsClick,
             openSearch = onSearchClick,
-            openVault = onVaultClick,
         )
         val viewModel = hiltViewModel<MediaPickerViewModel, MediaPickerViewModel.Factory>(
             creationCallback = { factory ->

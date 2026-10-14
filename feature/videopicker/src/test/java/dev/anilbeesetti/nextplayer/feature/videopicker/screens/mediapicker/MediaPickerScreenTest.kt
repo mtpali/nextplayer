@@ -4,12 +4,13 @@ import android.Manifest
 import android.app.Application
 import android.content.pm.PackageManager
 import androidx.activity.ComponentActivity
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isDialog
+import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -24,12 +25,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dev.anilbeesetti.nextplayer.core.domain.MediaHolder
-import dev.anilbeesetti.nextplayer.core.model.PlaylistSummary
-import dev.anilbeesetti.nextplayer.core.model.PlaylistType
 import dev.anilbeesetti.nextplayer.core.model.Video
 import dev.anilbeesetti.nextplayer.core.ui.R
 import dev.anilbeesetti.nextplayer.core.ui.base.DataState
 import dev.anilbeesetti.nextplayer.core.ui.theme.NextPlayerTheme
+import dev.anilbeesetti.nextplayer.feature.videopicker.state.toSelectedVideo
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -43,6 +44,64 @@ class MediaPickerScreenTest {
 
     @get:Rule
     val composeRule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun longPressMenuOmitsPlayCopyAndMove() {
+        showVideo()
+        composeRule.onNodeWithText("Clip").performTouchInput { longClick() }
+
+        listOf("Play", "Copy", "Move").forEach { title ->
+            composeRule.onNodeWithText(title).assertDoesNotExist()
+        }
+        listOf("Rename", "Share", "Info", "Delete").forEach { title ->
+            composeRule.onNodeWithText(title).assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun confirmingDeleteRetainsTheSelectedVideoUri() {
+        val actions = mutableListOf<MediaPickerAction>()
+        val video = showVideo(actions::add)
+        composeRule.onNodeWithText("Clip").performTouchInput { longClick() }
+        composeRule.onNodeWithText("Delete").performClick()
+        composeRule.onNode(isToggleable()).performClick()
+        composeRule.onNode(hasText("Delete") and hasAnyAncestor(isDialog())).performClick()
+
+        assertEquals(
+            listOf(MediaPickerAction.DeleteSelectedItems(setOf(video.toSelectedVideo()), permanently = true)),
+            actions.filterIsInstance<MediaPickerAction.DeleteSelectedItems>(),
+        )
+    }
+
+    @Test
+    fun cancellingDeletePreservesTheVideoSelection() {
+        val actions = mutableListOf<MediaPickerAction>()
+        showVideo(actions::add)
+        composeRule.onNodeWithText("Clip").performTouchInput { longClick() }
+        composeRule.onNodeWithText("Delete").performClick()
+        composeRule.onNodeWithText("Cancel").performClick()
+
+        composeRule.onNodeWithText("Delete").assertIsDisplayed()
+        assertTrue(actions.none { it is MediaPickerAction.DeleteSelectedItems })
+    }
+
+    private fun showVideo(onAction: (MediaPickerAction) -> Unit = {}): Video {
+        val application = ApplicationProvider.getApplicationContext<Application>()
+        shadowOf(application).grantPermissions(Manifest.permission.READ_MEDIA_VIDEO)
+        val video = Video.sample.copy(nameWithExtension = "Clip.mp4", uriString = "content://media/external/video/media/42")
+        composeRule.setContent {
+            NextPlayerTheme {
+                MediaPickerScreenContent(
+                    state = MediaPickerUiState(
+                        folderName = "Movies",
+                        mediaDataState = DataState.Success(MediaHolder(listOf(video), emptyList())),
+                    ),
+                    onAction = onAction,
+                )
+            }
+        }
+        return video
+    }
 
     @Test
     @Config(qualifiers = "w960dp-h540dp-land-television")
@@ -106,48 +165,4 @@ class MediaPickerScreenTest {
         assertTrue(MediaPickerAction.OnPermissionAccepted in actions)
     }
 
-    @Test
-    fun choosingPlaylistDispatchesActionAndExitsSelectionMode() {
-        val actions = mutableListOf<MediaPickerAction>()
-        val application = ApplicationProvider.getApplicationContext<Application>()
-        shadowOf(application).grantPermissions(Manifest.permission.READ_MEDIA_VIDEO)
-        var showPlaylistDialog by mutableStateOf(false)
-        val video = Video.sample.copy(nameWithExtension = "Video.mp4", uriString = "content://video/1")
-        composeRule.setContent {
-            NextPlayerTheme {
-                MediaPickerScreenContent(
-                    state = MediaPickerUiState(
-                        folderName = null,
-                        mediaDataState = DataState.Success(MediaHolder(folders = emptyList(), videos = listOf(video))),
-                        playlists = listOf(
-                            PlaylistSummary(
-                                id = 7,
-                                name = "Movies",
-                                type = PlaylistType.LOCAL,
-                                itemCount = 2,
-                                lastRefreshedAt = null,
-                            ),
-                        ),
-                        addToPlaylistState = AddToPlaylistState(
-                            isVisible = showPlaylistDialog,
-                            hasVideos = true,
-                        ),
-                    ),
-                    onAction = actions::add,
-                )
-            }
-        }
-
-        composeRule.onNodeWithText("Video").performTouchInput { longClick() }
-        composeRule.onNodeWithText("1 / 1 Selected").assertIsDisplayed()
-        composeRule.runOnIdle { showPlaylistDialog = true }
-
-        composeRule.onNodeWithText("Choose a playlist").assertIsDisplayed()
-        composeRule.onNodeWithText("Create new playlist").assertIsDisplayed()
-        composeRule.onNodeWithText("Movies").performClick()
-
-        assertTrue(MediaPickerAction.AddSelectionToPlaylist(7) in actions)
-        composeRule.runOnIdle { showPlaylistDialog = false }
-        composeRule.onNodeWithText("1 / 1 Selected").assertDoesNotExist()
-    }
 }

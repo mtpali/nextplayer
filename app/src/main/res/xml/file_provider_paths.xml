@@ -9,4 +9,11 @@
     <external-files-path
         name="external_files_path"
         path="." />
+    <!-- Keep access to downloads saved by older versions in Download/Player. -->
+    <external-path
+        name="player_downloads"
+        path="Download/Player/" />
+    <external-path
+        name="downloads_root"
+        path="Download/" />
 </paths>

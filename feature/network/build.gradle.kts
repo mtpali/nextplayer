@@ -35,12 +35,9 @@ kotlin {
 dependencies {
 
     implementation(project(":core:ui"))
-    implementation(project(":core:common"))
-    implementation(project(":core:data"))
-    implementation(project(":core:media"))
-    implementation(project(":core:model"))
 
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.activity.ktx)
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))
@@ -52,6 +49,8 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtimeCompose)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.serialization.json)
 
     // Hilt
     implementation(libs.hilt.android)
@@ -60,6 +59,7 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
 
     testImplementation(libs.junit4)
+    testImplementation(libs.robolectric)
     testImplementation(libs.kotlinx.coroutines.test)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

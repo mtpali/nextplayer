@@ -56,7 +56,6 @@ class MoreViewModel @AssistedInject constructor(
             is MoreAction.PlayVideo -> output.playVideo(action.uri)
             is MoreAction.OpenSettings -> output.openSettings()
             is MoreAction.OpenTrash -> output.openTrash()
-            is MoreAction.OpenVault -> output.openVault()
         }
     }
 
@@ -65,7 +64,6 @@ class MoreViewModel @AssistedInject constructor(
         val playVideo: (String) -> Unit,
         val openSettings: () -> Unit,
         val openTrash: () -> Unit,
-        val openVault: () -> Unit,
     )
 }
 
@@ -79,5 +77,4 @@ sealed interface MoreAction {
     data class PlayVideo(val uri: String) : MoreAction
     data object OpenSettings : MoreAction
     data object OpenTrash : MoreAction
-    data object OpenVault : MoreAction
 }

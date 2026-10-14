@@ -1,12 +1,10 @@
 package dev.anilbeesetti.nextplayer.navigation
 
 import android.app.Activity
-import android.content.Intent
 import android.net.Uri
 import androidx.core.content.IntentCompat
 import androidx.core.net.toUri
 import dev.anilbeesetti.nextplayer.feature.player.utils.PlayerApi
-import dev.anilbeesetti.nextplayer.feature.player.utils.PlaylistPlaybackContract
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -20,7 +18,7 @@ import org.robolectric.Shadows.shadowOf
 class MediaNavGraphTest {
 
     @Test
-    fun `single item explicit playlist is included in playback intent`() {
+    fun `single item explicit queue is included in playback intent`() {
         val context = Robolectric.buildActivity(Activity::class.java).setup().get()
         val uri = "content://media/external/video/media/1821".toUri()
 
@@ -29,23 +27,23 @@ class MediaNavGraphTest {
         val intent = shadowOf(context).nextStartedActivity
         assertEquals(
             arrayListOf(uri),
-            IntentCompat.getParcelableArrayListExtra(intent, PlayerApi.API_PLAYLIST, Uri::class.java),
+            IntentCompat.getParcelableArrayListExtra(intent, PlayerApi.API_VIDEO_LIST, Uri::class.java),
         )
     }
 
     @Test
-    fun `single video playback does not include explicit playlist`() {
+    fun `single video playback does not include explicit queue`() {
         val context = Robolectric.buildActivity(Activity::class.java).setup().get()
         val uri = "content://media/external/video/media/1821".toUri()
 
         context.startPlayback(uri)
 
         val intent = shadowOf(context).nextStartedActivity
-        assertFalse(intent.hasExtra(PlayerApi.API_PLAYLIST))
+        assertFalse(intent.hasExtra(PlayerApi.API_VIDEO_LIST))
     }
 
     @Test
-    fun `empty explicit playlist does not start playback`() {
+    fun `empty explicit queue does not start playback`() {
         val context = Robolectric.buildActivity(Activity::class.java).setup().get()
 
         context.startPlayback(emptyList())
@@ -54,38 +52,18 @@ class MediaNavGraphTest {
     }
 
     @Test
-    fun `explicit playlist starts at requested uri without changing queue order`() {
+    fun `explicit queue starts at first item and keeps queue order`() {
         val context = Robolectric.buildActivity(Activity::class.java).setup().get()
         val first = "content://media/external/video/media/1".toUri()
         val second = "content://media/external/video/media/2".toUri()
 
-        context.startPlayback(listOf(first, second), startUri = second)
+        context.startPlayback(listOf(first, second))
 
         val intent = shadowOf(context).nextStartedActivity
-        assertEquals(second, intent.data)
+        assertEquals(first, intent.data)
         assertEquals(
             arrayListOf(first, second),
-            IntentCompat.getParcelableArrayListExtra(intent, PlayerApi.API_PLAYLIST, Uri::class.java),
+            IntentCompat.getParcelableArrayListExtra(intent, PlayerApi.API_VIDEO_LIST, Uri::class.java),
         )
-    }
-
-    @Test
-    fun `saved playlist playback sends only playlist id and selected uri`() {
-        val context = Robolectric.buildActivity(Activity::class.java).setup().get()
-        val selected = "https://example.com/live".toUri()
-
-        context.startPlaylistPlayback(
-            playlistId = 42,
-            startUri = selected,
-        )
-
-        val intent = shadowOf(context).nextStartedActivity
-        assertEquals(Intent.ACTION_VIEW, intent.action)
-        assertEquals(selected, intent.data)
-        assertEquals(
-            42L,
-            intent.getLongExtra(PlaylistPlaybackContract.EXTRA_PLAYLIST_ID, -1),
-        )
-        assertFalse(intent.hasExtra(PlayerApi.API_PLAYLIST))
     }
 }

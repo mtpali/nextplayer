@@ -35,7 +35,7 @@ class LocalSubtitleTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
 
     @Test
-    fun subtitlesAndDecoderChoicesSurviveReloadsAndPlaylistNavigation() {
+    fun subtitlesAndDecoderChoicesSurviveReloadsAndPlaybackQueueNavigation() {
         val context = instrumentation.targetContext
         val directory = File(context.cacheDir, "local-subtitle-test-${System.nanoTime()}").apply { mkdirs() }
 

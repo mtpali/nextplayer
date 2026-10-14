@@ -11,7 +11,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.PlayerSurface
-import androidx.media3.ui.compose.SURFACE_TYPE_SURFACE_VIEW
+import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import androidx.media3.ui.compose.modifiers.resizeWithContentScale
 import androidx.media3.ui.compose.state.rememberPresentationState
 import dev.anilbeesetti.nextplayer.feature.player.extensions.toContentScale
@@ -38,11 +38,14 @@ fun PlayerContentFrame(
     videoZoomAndContentScaleState: VideoZoomAndContentScaleState,
     volumeAndBrightnessGestureState: VolumeAndBrightnessGestureState,
     subtitleConfiguration: SubtitleConfiguration,
+    onVideoBoundsChanged: (Rect) -> Unit = {},
 ) {
     val presentationState = rememberPresentationState(player)
     PlayerSurface(
         player = player,
-        surfaceType = SURFACE_TYPE_SURFACE_VIEW,
+        // TextureView is composited into the app window, allowing screenshots to contain the
+        // decoded video frame instead of the black placeholder produced by a separate SurfaceView.
+        surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
         modifier = modifier
             .resizeWithContentScale(
                 contentScale = videoZoomAndContentScaleState.videoContentScale.toContentScale(),
@@ -62,6 +65,7 @@ fun PlayerContentFrame(
                     bounds.bottom.toInt(),
                 )
                 pictureInPictureState.setVideoViewRect(rect)
+                onVideoBoundsChanged(rect)
             }
             .graphicsLayer {
                 scaleX = videoZoomAndContentScaleState.zoom
