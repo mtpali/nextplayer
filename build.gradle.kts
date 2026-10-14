@@ -32,6 +32,7 @@ subprojects {
 
 allprojects {
     tasks.withType<Test>().configureEach {
+        systemProperty("robolectric.dependency.repo.url", "https://repo.maven.apache.org/maven2")
         testLogging {
             events = setOf(
                 TestLogEvent.PASSED,
