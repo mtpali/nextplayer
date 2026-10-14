@@ -5,7 +5,6 @@ import android.app.Application
 import android.content.pm.PackageManager
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.hasAnyAncestor
