@@ -192,8 +192,9 @@ class LocalMediaDeletionTest {
         ) {
             assertEquals("Consent must launch on the main thread", Looper.getMainLooper(), Looper.myLooper())
             if (contract is ActivityResultContracts.RequestPermission) {
-                permissions += input as String
-                if (granted) shadowOf(application).grantPermissions(input)
+                val permission = input as String
+                permissions += permission
+                if (granted) shadowOf(application).grantPermissions(permission)
                 dispatchResult(requestCode, granted)
             } else {
                 mediaRequests++

@@ -176,8 +176,8 @@ class MediaPickerViewModel @AssistedInject constructor(
             } catch (e: Exception) {
                 false
             }
-            // Also refresh after a denied batch: preceding batches may already have been removed.
-            mediaSynchronizer.refresh()
+            // Re-query after partial batches too, without rescanning every file on the device.
+            collectMedia()
             if (!deleted) {
                 systemService.showToast(systemService.getString(R.string.delete_videos_failed), Toast.LENGTH_LONG)
             }
