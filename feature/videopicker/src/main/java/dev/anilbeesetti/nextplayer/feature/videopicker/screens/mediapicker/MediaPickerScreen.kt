@@ -310,10 +310,6 @@ internal fun MediaPickerScreenContent(
                 contentFocusRequester = focusState.requester,
                 showRenameAction = selectionManager.isSingleVideoSelected,
                 showInfoAction = selectionManager.isSingleVideoSelected,
-                onPlayAction = {
-                    onAction(MediaPickerAction.PlaySelectedItems(selectionManager.selectionItems))
-                    selectionManager.exitSelectionMode()
-                },
                 onRenameAction = {
                     val selectedVideo = selectionManager.selectionItems.firstOrNull() ?: return@SelectionActionsSheet
                     val video = (state.mediaDataState as? DataState.Success)?.value?.videos
@@ -329,14 +325,6 @@ internal fun MediaPickerScreenContent(
                 },
                 onShareAction = {
                     onAction(MediaPickerAction.ShareSelectedItems(selectionManager.selectionItems))
-                },
-                onCopyAction = {
-                    onAction(MediaPickerAction.CopySelectedItems(selectionManager.selectionItems))
-                    selectionManager.exitSelectionMode()
-                },
-                onMoveAction = {
-                    onAction(MediaPickerAction.MoveSelectedItems(selectionManager.selectionItems))
-                    selectionManager.exitSelectionMode()
                 },
                 onDeleteAction = {
                     showDeleteVideosConfirmation = true
@@ -649,11 +637,8 @@ private fun SelectionActionsSheet(
     contentFocusRequester: FocusRequester,
     showRenameAction: Boolean,
     showInfoAction: Boolean,
-    onPlayAction: () -> Unit,
     onRenameAction: () -> Unit,
     onShareAction: () -> Unit,
-    onCopyAction: () -> Unit,
-    onMoveAction: () -> Unit,
     onInfoAction: () -> Unit,
     onDeleteAction: () -> Unit,
 ) {
@@ -695,15 +680,9 @@ private fun SelectionActionsSheet(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
-                SelectionAction(
-                    modifier = Modifier.thenIf(isTv) { focusRequester(firstActionFocusRequester) },
-                    isTv = isTv,
-                    imageVector = NextIcons.Play,
-                    title = stringResource(R.string.play),
-                    onClick = onPlayAction,
-                )
                 if (showRenameAction) {
                     SelectionAction(
+                        modifier = Modifier.thenIf(isTv) { focusRequester(firstActionFocusRequester) },
                         isTv = isTv,
                         imageVector = NextIcons.Edit,
                         title = stringResource(R.string.rename),
@@ -711,22 +690,11 @@ private fun SelectionActionsSheet(
                     )
                 }
                 SelectionAction(
+                    modifier = Modifier.thenIf(isTv && !showRenameAction) { focusRequester(firstActionFocusRequester) },
                     isTv = isTv,
                     imageVector = NextIcons.Share,
                     title = stringResource(R.string.share),
                     onClick = onShareAction,
-                )
-                SelectionAction(
-                    isTv = isTv,
-                    imageVector = NextIcons.Copy,
-                    title = stringResource(R.string.copy),
-                    onClick = onCopyAction,
-                )
-                SelectionAction(
-                    isTv = isTv,
-                    imageVector = NextIcons.Move,
-                    title = stringResource(R.string.move),
-                    onClick = onMoveAction,
                 )
                 if (showInfoAction) {
                     SelectionAction(

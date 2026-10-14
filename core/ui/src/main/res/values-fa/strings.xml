@@ -152,6 +152,7 @@
     <string name="subtitle_text_encoding">کدگذاری زیرنویس</string>
     <string name="share">اشتراک</string>
     <string name="delete">پاک‌کردن</string>
+    <string name="delete_videos_failed">حذف ویدیو انجام نشد. دسترسی به فایل و تأیید درخواست حذف را بررسی کنید و دوباره امتحان کنید.</string>
     <string name="delete_file">پرونده زیر برای همیشه پاک خواهد شد</string>
     <string name="best_fit">بهترین تناسب</string>
     <string name="stretch">کشیده</string>

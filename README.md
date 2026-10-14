@@ -19,9 +19,11 @@ The shipped APK is intentionally limited to `armeabi-v7a` (ARMv7).
   Untyped links opened from other browsers still use the separate link handoff.
 - Capture the visible video frame from the player controls and save it under `Pictures/Player`.
 - In Settings → Subtitle, choose a local TTF/OTF font, switch subtitle text between
-  white and yellow, and enable a black outline. Custom appearance takes precedence
+  white and yellow, and enable a black text shadow. Custom appearance takes precedence
   over styles embedded in subtitle files; system caption style can still be selected.
 - Use the supplied Player launcher icon without adaptive-icon zoom.
+- Long-press a video for Rename, Share, Info, and Delete. Deletion requests the
+  required Android permission and refreshes the library; failed requests show a message.
 - Show Mobile Tina Instagram and developer Telegram destinations in a modern About screen.
 - Minify, shrink, rename, and repackage release code with R8.
 

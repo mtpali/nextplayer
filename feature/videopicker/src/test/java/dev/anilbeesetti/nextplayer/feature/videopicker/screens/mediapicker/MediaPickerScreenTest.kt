@@ -5,13 +5,18 @@ import android.app.Application
 import android.content.pm.PackageManager
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.lifecycle.Lifecycle
@@ -22,6 +27,8 @@ import dev.anilbeesetti.nextplayer.core.model.Video
 import dev.anilbeesetti.nextplayer.core.ui.R
 import dev.anilbeesetti.nextplayer.core.ui.base.DataState
 import dev.anilbeesetti.nextplayer.core.ui.theme.NextPlayerTheme
+import dev.anilbeesetti.nextplayer.feature.videopicker.state.toSelectedVideo
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -35,6 +42,64 @@ class MediaPickerScreenTest {
 
     @get:Rule
     val composeRule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun longPressMenuOmitsPlayCopyAndMove() {
+        showVideo()
+        composeRule.onNodeWithText("Clip").performTouchInput { longClick() }
+
+        listOf("Play", "Copy", "Move").forEach { title ->
+            composeRule.onNodeWithText(title).assertDoesNotExist()
+        }
+        listOf("Rename", "Share", "Info", "Delete").forEach { title ->
+            composeRule.onNodeWithText(title).assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun confirmingDeleteRetainsTheSelectedVideoUri() {
+        val actions = mutableListOf<MediaPickerAction>()
+        val video = showVideo(actions::add)
+        composeRule.onNodeWithText("Clip").performTouchInput { longClick() }
+        composeRule.onNodeWithText("Delete").performClick()
+        composeRule.onNode(isToggleable()).performClick()
+        composeRule.onNodeWithText("Delete").performClick()
+
+        assertEquals(
+            listOf(MediaPickerAction.DeleteSelectedItems(setOf(video.toSelectedVideo()), permanently = true)),
+            actions.filterIsInstance<MediaPickerAction.DeleteSelectedItems>(),
+        )
+    }
+
+    @Test
+    fun cancellingDeletePreservesTheVideoSelection() {
+        val actions = mutableListOf<MediaPickerAction>()
+        showVideo(actions::add)
+        composeRule.onNodeWithText("Clip").performTouchInput { longClick() }
+        composeRule.onNodeWithText("Delete").performClick()
+        composeRule.onNodeWithText("Cancel").performClick()
+
+        composeRule.onNodeWithText("Delete").assertIsDisplayed()
+        assertTrue(actions.none { it is MediaPickerAction.DeleteSelectedItems })
+    }
+
+    private fun showVideo(onAction: (MediaPickerAction) -> Unit = {}): Video {
+        val application = ApplicationProvider.getApplicationContext<Application>()
+        shadowOf(application).grantPermissions(Manifest.permission.READ_MEDIA_VIDEO)
+        val video = Video.sample.copy(nameWithExtension = "Clip.mp4", uriString = "content://media/external/video/media/42")
+        composeRule.setContent {
+            NextPlayerTheme {
+                MediaPickerScreenContent(
+                    state = MediaPickerUiState(
+                        folderName = "Movies",
+                        mediaDataState = DataState.Success(MediaHolder(listOf(video), emptyList())),
+                    ),
+                    onAction = onAction,
+                )
+            }
+        }
+        return video
+    }
 
     @Test
     @Config(qualifiers = "w960dp-h540dp-land-television")

@@ -38,6 +38,7 @@ import dev.anilbeesetti.nextplayer.core.ui.base.DataState
 import dev.anilbeesetti.nextplayer.core.ui.base.MviViewModel
 import dev.anilbeesetti.nextplayer.feature.videopicker.state.SelectionItem
 import java.io.File
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -167,8 +168,19 @@ class MediaPickerViewModel @AssistedInject constructor(
 
     private fun deleteSelectedItems(selectedItems: Set<SelectionItem>, permanently: Boolean) {
         viewModelScope.launch {
-            val videoUris = selectedItems.toVideoUris()
-            mediaOperationsService.deleteMedia(videoUris, permanently = permanently)
+            val deleted = try {
+                val videoUris = selectedItems.toVideoUris()
+                videoUris.isNotEmpty() && mediaOperationsService.deleteMedia(videoUris, permanently = permanently)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                false
+            }
+            // Also refresh after a denied batch: preceding batches may already have been removed.
+            mediaSynchronizer.refresh()
+            if (!deleted) {
+                systemService.showToast(systemService.getString(R.string.delete_videos_failed), Toast.LENGTH_LONG)
+            }
         }
     }
 

@@ -173,6 +173,7 @@
     <string name="seconds">%1$s seconds</string>
     <string name="share">Share</string>
     <string name="delete">Delete</string>
+    <string name="delete_videos_failed">Videos could not be deleted. Check file access and approve the deletion request, then try again.</string>
     <string name="delete_permanently">Delete permanently</string>
     <string name="restore">Restore</string>
     <string name="trash">Trash</string>
