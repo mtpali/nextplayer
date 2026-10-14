@@ -29,6 +29,12 @@ import dev.anilbeesetti.nextplayer.core.common.extensions.getFilenameFromUri
 import dev.anilbeesetti.nextplayer.core.common.extensions.getPath
 import dev.anilbeesetti.nextplayer.core.common.extensions.scanPaths
 import dev.anilbeesetti.nextplayer.core.common.extensions.updateMedia
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -42,12 +48,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
-import java.io.OutputStream
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class LocalMediaOperationsService @Inject constructor(

@@ -531,7 +531,7 @@ private data class ProbeResponse(
 )
 
 internal fun sanitizeFileName(name: String): String =
-    name.replace(Regex("[\\/:*?\"<>|]"), "_").trim().ifBlank { "download" }
+    name.replace(Regex("""[\\/:*?"<>|]"""), "_").trim().ifBlank { "download" }
 
 internal fun uniqueFile(directory: File, name: String): File {
     val extension = name.substringAfterLast('.', missingDelimiterValue = "")
