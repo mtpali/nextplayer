@@ -11,56 +11,40 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
+import android.os.SystemClock
 import android.provider.MediaStore
-import android.webkit.URLUtil
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import dev.anilbeesetti.nextplayer.core.ui.R
 import java.io.File
 import java.io.FileOutputStream
-import java.net.HttpURLConnection
-import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-
-internal data class ByteRange(val start: Long, val endInclusive: Long) {
-    val length: Long get() = endInclusive - start + 1L
-}
-
-internal fun splitIntoRanges(
-    totalBytes: Long,
-    requestedParts: Int = SegmentedDownloadService.DEFAULT_THREAD_COUNT,
-): List<ByteRange> {
-    require(totalBytes > 0L)
-    require(requestedParts > 0)
-    val partCount = minOf(totalBytes, requestedParts.toLong()).toInt()
-    val baseLength = totalBytes / partCount
-    return List(partCount) { index ->
-        val start = index * baseLength
-        val end = if (index == partCount - 1) totalBytes - 1L else start + baseLength - 1L
-        ByteRange(start = start, endInclusive = end)
-    }
-}
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 class SegmentedDownloadService : Service() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val jobs = ConcurrentHashMap<Long, Job>()
     private val cancelledDownloads = ConcurrentHashMap.newKeySet<Long>()
     private val notificationLock = Any()
+    private val clients = ConcurrentHashMap<Long, DownloadHttpClient>()
+    private val downloadSlots = Semaphore(3)
+    private val mainHandler = Handler(Looper.getMainLooper())
     private lateinit var store: DownloadStore
     private lateinit var notificationManager: NotificationManager
     private var foregroundStarted = false
@@ -78,8 +62,9 @@ class SegmentedDownloadService : Service() {
         when (intent?.action) {
             ACTION_START -> if (id >= 0L) startDownload(id)
             ACTION_CANCEL -> if (id >= 0L) cancelDownload(id)
+            ACTION_PAUSE -> if (id >= 0L) cancelDownload(id, showPaused = true)
         }
-        if (jobs.isEmpty() && intent?.action == ACTION_CANCEL) stopWhenIdle()
+        if (jobs.isEmpty()) stopWhenIdle()
         return START_NOT_STICKY
     }
 
@@ -95,29 +80,34 @@ class SegmentedDownloadService : Service() {
                 }
             }
         }
+        clients.values.forEach(DownloadHttpClient::cancel)
         serviceScope.cancel()
         super.onDestroy()
     }
 
     private fun startDownload(id: Long) {
-        if (jobs[id]?.isActive == true) return
+        val previous = jobs[id]
+        if (previous?.isActive == true) return
         val record = store.get(id) ?: return
         if (record.status == DownloadStatus.SUCCESSFUL) return
-        cancelledDownloads.remove(id)
-        jobs[id] = serviceScope.launch {
+        val client = DownloadHttpClient()
+        val job = serviceScope.launch(start = CoroutineStart.LAZY) {
             try {
-                download(record)
+                // A resumed transfer must not share part files with a still-closing worker.
+                previous?.join()
+                coroutineContext.ensureActive()
+                if (store.get(id) == null) return@launch
+                cancelledDownloads.remove(id)
+                clients[id] = client
+                downloadSlots.withPermit {
+                    store.get(id)?.let { download(it, client) }
+                }
             } catch (_: CancellationException) {
                 store.update(id) { current ->
-                    current.copy(status = DownloadStatus.PAUSED, bytesPerSecond = 0L)
+                    if (current.status == DownloadStatus.SUCCESSFUL) current else current.copy(status = DownloadStatus.PAUSED, bytesPerSecond = 0L)
                 }
             } catch (error: Exception) {
-                if (cancelledDownloads.contains(id)) {
-                    store.update(id) { current ->
-                        current.copy(status = DownloadStatus.PAUSED, bytesPerSecond = 0L)
-                    }
-                    return@launch
-                }
+                if (cancelledDownloads.contains(id)) return@launch
                 val failed = store.update(id) { current ->
                     current.copy(
                         status = DownloadStatus.FAILED,
@@ -127,183 +117,66 @@ class SegmentedDownloadService : Service() {
                 }
                 failed?.let(::showNotification)
             } finally {
-                jobs.remove(id)
-                if (jobs.isEmpty()) stopWhenIdle()
+                client.cancel()
+                clients.remove(id, client)
+                jobs.remove(id, coroutineContext.job)
+                if (store.get(id) == null) downloadPartsDirectory(this@SegmentedDownloadService, id).deleteRecursively()
+                stopWhenIdle()
             }
         }
+        jobs[id] = job
+        job.start()
     }
 
-    private fun cancelDownload(id: Long) {
+    private fun cancelDownload(id: Long, showPaused: Boolean = false) {
         synchronized(notificationLock) {
+            if (store.get(id)?.status == DownloadStatus.SUCCESSFUL) return
             cancelledDownloads.add(id)
             notificationManager.cancel(notificationId(id))
         }
-        jobs.remove(id)?.cancel()
-        store.update(id) { record ->
+        jobs[id]?.cancel()
+        clients[id]?.cancel()
+        val paused = store.update(id) { record ->
             record.copy(status = DownloadStatus.PAUSED, bytesPerSecond = 0L)
         }
+        if (showPaused && paused != null) showNotification(paused)
     }
 
-    private suspend fun download(initialRecord: PersistedDownload) {
-        val response = probe(initialRecord.source)
-        val safeTitle = sanitizeFileName(
-            URLUtil.guessFileName(initialRecord.source, response.contentDisposition, response.mimeType),
+    private suspend fun download(initialRecord: PersistedDownload, client: DownloadHttpClient) {
+        val response = client.probe(initialRecord.source)
+        val fileInfo = resolveDownloadFileInfo(
+            sourceUrl = initialRecord.source,
+            resolvedUrl = response.url,
+            contentDisposition = response.contentDisposition,
+            mimeType = response.mimeType,
+            suggestedName = initialRecord.suggestedName,
+            mimeTypeHint = initialRecord.mimeTypeHint,
         )
-        val ranges = if (response.supportsRanges && response.totalBytes > 0L) {
-            splitIntoRanges(response.totalBytes)
-        } else {
-            emptyList()
-        }
-        var record = store.update(initialRecord.id) {
-            it.copy(
-                title = safeTitle,
-                mimeType = response.mimeType ?: guessMimeType(initialRecord.source),
-                totalBytes = response.totalBytes,
-                threadCount = ranges.size.takeIf { count -> count > 0 } ?: 1,
-                status = DownloadStatus.RUNNING,
-                reason = 0,
-            )
+        store.update(initialRecord.id) {
+            it.copy(title = fileInfo.name, mimeType = fileInfo.mimeType, totalBytes = response.totalBytes, reason = 0)
         } ?: return
-        showNotification(record)
-
-        val directory = downloadPartsDirectory(this, record.id).apply { mkdirs() }
-        val progress = AtomicLong(0L)
-
-        if (ranges.isNotEmpty()) {
-            val partFiles = ranges.indices.map { File(directory, "part-$it") }
-            progress.set(
-                partFiles.zip(ranges).sumOf { (file, range) ->
-                    file.length().coerceAtMost(range.length)
-                },
-            )
-            reportProgress(record.id, progress.get(), response.totalBytes, 0L)
-            val reporter = ProgressReporter(record.id, progress)
-            coroutineScope {
-                ranges.mapIndexed { index, range ->
-                    async {
-                        downloadRange(
-                            url = record.source,
-                            range = range,
-                            destination = partFiles[index],
-                            progress = progress,
-                            reporter = reporter,
-                        )
-                    }
-                }.awaitAll()
-            }
-            record = store.get(record.id) ?: return
-            val localUri = mergeParts(record, partFiles)
-            complete(record.id, localUri)
-        } else {
-            val partFile = File(directory, "part-0")
-            partFile.delete()
-            val reporter = ProgressReporter(record.id, progress)
-            downloadSingle(
-                url = record.source,
-                destination = partFile,
-                progress = progress,
-                reporter = reporter,
-            )
-            record = store.get(record.id) ?: return
-            val localUri = mergeParts(record, listOf(partFile))
-            complete(record.id, localUri)
+        val directory = downloadPartsDirectory(this, initialRecord.id)
+        val reporter = ProgressReporter(initialRecord.id)
+        val result = client.download(
+            remote = response,
+            directory = directory,
+            onStarted = { count, bytes ->
+                reporter.reset(bytes)
+                store.update(initialRecord.id) { it.copy(threadCount = count) }
+                reportProgress(initialRecord.id, bytes, response.totalBytes, 0L)
+            },
+            onProgress = reporter::report,
+        )
+        coroutineContext.ensureActive()
+        reportProgress(initialRecord.id, result.totalBytes, result.totalBytes, 0L)
+        val record = store.get(initialRecord.id) ?: return
+        val localUri = mergeParts(record, result.files)
+        if (!complete(record.id, localUri)) {
+            runCatching { contentResolver.delete(localUri, null, null) }
         }
     }
 
-    private fun probe(url: String): ProbeResponse {
-        val connection = openConnection(url).apply {
-            setRequestProperty("Range", "bytes=0-0")
-        }
-        return try {
-            val code = connection.responseCode
-            require(code in 200..299) { "HTTP $code" }
-            val contentRange = connection.getHeaderField("Content-Range")
-            val rangeTotal = contentRange?.substringAfterLast('/')?.toLongOrNull()
-            val totalBytes = when {
-                code == HttpURLConnection.HTTP_PARTIAL && rangeTotal != null -> rangeTotal
-                connection.contentLengthLong > 0L -> connection.contentLengthLong
-                else -> -1L
-            }
-            runCatching { connection.inputStream.close() }
-            ProbeResponse(
-                totalBytes = totalBytes,
-                supportsRanges = code == HttpURLConnection.HTTP_PARTIAL && totalBytes > 0L,
-                mimeType = connection.contentType?.substringBefore(';'),
-                contentDisposition = connection.getHeaderField("Content-Disposition"),
-            )
-        } finally {
-            connection.disconnect()
-        }
-    }
-
-    private suspend fun downloadRange(
-        url: String,
-        range: ByteRange,
-        destination: File,
-        progress: AtomicLong,
-        reporter: ProgressReporter,
-    ) {
-        var existing = destination.length()
-        if (existing > range.length) {
-            destination.delete()
-            existing = 0L
-        }
-        if (existing == range.length) return
-        val start = range.start + existing
-        val connection = openConnection(url).apply {
-            setRequestProperty("Range", "bytes=" + start + "-" + range.endInclusive)
-        }
-        try {
-            require(connection.responseCode == HttpURLConnection.HTTP_PARTIAL) {
-                "Server stopped supporting ranged downloads"
-            }
-            connection.inputStream.buffered(BUFFER_SIZE).use { input ->
-                FileOutputStream(destination, true).buffered(BUFFER_SIZE).use { output ->
-                    copyWithProgress(input, output, progress, reporter)
-                }
-            }
-            require(destination.length() == range.length) { "Incomplete download segment" }
-        } finally {
-            connection.disconnect()
-        }
-    }
-
-    private suspend fun downloadSingle(
-        url: String,
-        destination: File,
-        progress: AtomicLong,
-        reporter: ProgressReporter,
-    ) {
-        val connection = openConnection(url)
-        try {
-            require(connection.responseCode in 200..299) { "HTTP " + connection.responseCode }
-            connection.inputStream.buffered(BUFFER_SIZE).use { input ->
-                FileOutputStream(destination, false).buffered(BUFFER_SIZE).use { output ->
-                    copyWithProgress(input, output, progress, reporter)
-                }
-            }
-        } finally {
-            connection.disconnect()
-        }
-    }
-
-    private suspend fun copyWithProgress(
-        input: java.io.InputStream,
-        output: java.io.OutputStream,
-        progress: AtomicLong,
-        reporter: ProgressReporter,
-    ) {
-        val buffer = ByteArray(BUFFER_SIZE)
-        while (true) {
-            coroutineContext.ensureActive()
-            val count = input.read(buffer)
-            if (count < 0) break
-            output.write(buffer, 0, count)
-            reporter.report(progress.addAndGet(count.toLong()))
-        }
-    }
-
-    private fun mergeParts(record: PersistedDownload, parts: List<File>): Uri {
+    private suspend fun mergeParts(record: PersistedDownload, parts: List<File>): Uri {
         val mimeType = record.mimeType ?: "application/octet-stream"
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val values = ContentValues().apply {
@@ -318,10 +191,11 @@ class SegmentedDownloadService : Service() {
                 contentResolver.openOutputStream(uri, "w")?.use { output ->
                     parts.forEach { part ->
                         part.inputStream().buffered(BUFFER_SIZE).use { input ->
-                            input.copyTo(output, BUFFER_SIZE)
+                            copyToDestination(input, output)
                         }
                     }
                 } ?: error("Unable to open download destination")
+                coroutineContext.ensureActive()
                 values.clear()
                 values.put(MediaStore.Downloads.IS_PENDING, 0)
                 contentResolver.update(uri, values, null, null)
@@ -338,10 +212,11 @@ class SegmentedDownloadService : Service() {
                 FileOutputStream(outputFile).buffered(BUFFER_SIZE).use { output ->
                     parts.forEach { part ->
                         part.inputStream().buffered(BUFFER_SIZE).use { input ->
-                            input.copyTo(output, BUFFER_SIZE)
+                            copyToDestination(input, output)
                         }
                     }
                 }
+                coroutineContext.ensureActive()
                 FileProvider.getUriForFile(this, "$packageName.fileprovider", outputFile)
             } catch (error: Exception) {
                 outputFile.delete()
@@ -350,30 +225,46 @@ class SegmentedDownloadService : Service() {
         }
     }
 
-    private fun complete(id: Long, localUri: Uri) {
-        if (cancelledDownloads.contains(id)) return
-        downloadPartsDirectory(this, id).deleteRecursively()
-        val complete = store.update(id) { record ->
-            record.copy(
-                localUri = localUri.toString(),
-                downloadedBytes = record.totalBytes.takeIf { it > 0L } ?: record.downloadedBytes,
-                bytesPerSecond = 0L,
-                status = DownloadStatus.SUCCESSFUL,
-            )
+    private suspend fun copyToDestination(input: java.io.InputStream, output: java.io.OutputStream) {
+        val buffer = ByteArray(BUFFER_SIZE)
+        while (true) {
+            coroutineContext.ensureActive()
+            val count = input.read(buffer)
+            if (count < 0) return
+            output.write(buffer, 0, count)
         }
-        complete?.let(::showNotification)
     }
 
-    private inner class ProgressReporter(
-        private val id: Long,
-        progress: AtomicLong,
-    ) {
-        private var lastBytes = progress.get()
-        private var lastTime = System.currentTimeMillis()
+    private fun complete(id: Long, localUri: Uri): Boolean {
+        val completed = synchronized(notificationLock) {
+            if (cancelledDownloads.contains(id)) return false
+            store.update(id) { record ->
+                record.copy(
+                    localUri = localUri.toString(),
+                    downloadedBytes = record.totalBytes,
+                    bytesPerSecond = 0L,
+                    status = DownloadStatus.SUCCESSFUL,
+                )
+            }
+        } ?: return false
+        downloadPartsDirectory(this, id).deleteRecursively()
+        showNotification(completed)
+        return true
+    }
+
+    private inner class ProgressReporter(private val id: Long) {
+        private var lastBytes = 0L
+        private var lastTime = SystemClock.elapsedRealtime()
+
+        @Synchronized
+        fun reset(bytes: Long) {
+            lastBytes = bytes
+            lastTime = SystemClock.elapsedRealtime()
+        }
 
         @Synchronized
         fun report(downloadedBytes: Long) {
-            val now = System.currentTimeMillis()
+            val now = SystemClock.elapsedRealtime()
             val elapsed = now - lastTime
             if (elapsed < PROGRESS_UPDATE_INTERVAL_MS) return
             val speed = ((downloadedBytes - lastBytes).coerceAtLeast(0L) * 1000L) / elapsed.coerceAtLeast(1L)
@@ -430,12 +321,15 @@ class SegmentedDownloadService : Service() {
             builder.setProgress(1000, progress, record.totalBytes <= 0L)
             builder.addAction(
                 android.R.drawable.ic_menu_close_clear_cancel,
-                getString(R.string.cancel),
-                cancelPendingIntent(record.id),
+                getString(R.string.pause_download),
+                actionPendingIntent(record.id, ACTION_PAUSE),
             )
         }
+        if (record.status == DownloadStatus.PAUSED) {
+            builder.addAction(android.R.drawable.ic_media_play, getString(R.string.resume), actionPendingIntent(record.id, ACTION_START))
+        }
         synchronized(notificationLock) {
-            if (!cancelledDownloads.contains(record.id)) {
+            if (!cancelledDownloads.contains(record.id) || record.status == DownloadStatus.PAUSED) {
                 notificationManager.notify(notificationId(record.id), builder.build())
             }
         }
@@ -448,9 +342,13 @@ class SegmentedDownloadService : Service() {
     }
 
     private fun stopWhenIdle() {
-        stopForeground(STOP_FOREGROUND_REMOVE)
-        foregroundStarted = false
-        stopSelf()
+        mainHandler.post {
+            if (jobs.isEmpty()) {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+                foregroundStarted = false
+                stopSelf()
+            }
+        }
     }
 
     private fun summaryNotification(): Notification = NotificationCompat.Builder(this, CHANNEL_ID)
@@ -461,9 +359,9 @@ class SegmentedDownloadService : Service() {
         .setSilent(true)
         .build()
 
-    private fun cancelPendingIntent(id: Long): PendingIntent {
+    private fun actionPendingIntent(id: Long, action: String): PendingIntent {
         val intent = Intent(this, SegmentedDownloadService::class.java)
-            .setAction(ACTION_CANCEL)
+            .setAction(action)
             .putExtra(EXTRA_DOWNLOAD_ID, id)
         return PendingIntent.getService(
             this,
@@ -483,31 +381,27 @@ class SegmentedDownloadService : Service() {
         notificationManager.createNotificationChannel(channel)
     }
 
-    private fun openConnection(rawUrl: String): HttpURLConnection =
-        (URL(rawUrl).openConnection() as HttpURLConnection).apply {
-            instanceFollowRedirects = true
-            connectTimeout = CONNECTION_TIMEOUT_MS
-            readTimeout = READ_TIMEOUT_MS
-            setRequestProperty("Accept-Encoding", "identity")
-            setRequestProperty("User-Agent", USER_AGENT)
-        }
-
     companion object {
-        const val DEFAULT_THREAD_COUNT = 8
+        const val DEFAULT_THREAD_COUNT = DEFAULT_DOWNLOAD_CONNECTIONS
         private const val ACTION_START = "player.download.START"
         private const val ACTION_CANCEL = "player.download.CANCEL"
+        private const val ACTION_PAUSE = "player.download.PAUSE"
         private const val EXTRA_DOWNLOAD_ID = "download_id"
         private const val CHANNEL_ID = "player_downloads"
         private const val SUMMARY_NOTIFICATION_ID = 4100
-        private const val BUFFER_SIZE = 256 * 1024
-        private const val CONNECTION_TIMEOUT_MS = 30_000
-        private const val READ_TIMEOUT_MS = 30_000
+        private const val BUFFER_SIZE = 64 * 1024
         private const val PROGRESS_UPDATE_INTERVAL_MS = 500L
-        private const val USER_AGENT = "Player/0.18 Android"
 
         fun start(context: Context, id: Long) {
             val intent = Intent(context, SegmentedDownloadService::class.java)
                 .setAction(ACTION_START)
+                .putExtra(EXTRA_DOWNLOAD_ID, id)
+            ContextCompat.startForegroundService(context, intent)
+        }
+
+        fun pause(context: Context, id: Long) {
+            val intent = Intent(context, SegmentedDownloadService::class.java)
+                .setAction(ACTION_PAUSE)
                 .putExtra(EXTRA_DOWNLOAD_ID, id)
             ContextCompat.startForegroundService(context, intent)
         }
@@ -522,16 +416,6 @@ class SegmentedDownloadService : Service() {
         private fun notificationId(id: Long): Int = 5000 + ((id xor (id ushr 32)).toInt() and 0x0FFFFFFF)
     }
 }
-
-private data class ProbeResponse(
-    val totalBytes: Long,
-    val supportsRanges: Boolean,
-    val mimeType: String?,
-    val contentDisposition: String?,
-)
-
-internal fun sanitizeFileName(name: String): String =
-    name.replace(Regex("""[\\/:*?"<>|]"""), "_").trim().ifBlank { "download" }
 
 internal fun uniqueFile(directory: File, name: String): File {
     val extension = name.substringAfterLast('.', missingDelimiterValue = "")

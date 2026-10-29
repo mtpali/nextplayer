@@ -361,7 +361,8 @@
     <string name="cannot_open_download">برنامه‌ای برای باز کردن این فایل پیدا نشد.</string>
     <string name="download_pending">در انتظار</string>
     <string name="download_running">در حال دانلود</string>
-    <string name="download_paused">توسط سیستم متوقف شده</string>
+    <string name="download_paused">متوقف شده</string>
+    <string name="pause_download">توقف دانلود</string>
     <string name="download_complete">تکمیل شده</string>
     <string name="download_progress">%1$d٪ دانلود شده</string>
     <string name="download_size_progress">%1$s از %2$s</string>
@@ -372,7 +373,7 @@
     <string name="remove_download">دانلود حذف شود؟</string>
     <string name="remove_download_confirmation">«%1$s» و فایل دانلودشده حذف می‌شوند.</string>
     <string name="download_with_player">دانلود با Player</string>
-    <string name="download_confirmation">«%1$s» در پوشه Player دانلود شود؟</string>
+    <string name="download_confirmation">«%1$s» در پوشه دانلودها ذخیره شود؟</string>
     <string name="take_screenshot">گرفتن اسکرین‌شات</string>
     <string name="screenshot_saved">اسکرین‌شات در Pictures/Player ذخیره شد</string>
     <string name="screenshot_failed">ثبت این فریم ممکن نشد.</string>

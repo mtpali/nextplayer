@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -186,6 +188,7 @@ internal fun NetworkScreenContent(
                             item = item,
                             onOpen = { onAction(NetworkAction.OpenDownload(item.id)) },
                             onRetry = { onDownloadAction(NetworkAction.RetryDownload(item.id)) },
+                            onPause = { onAction(NetworkAction.PauseDownload(item.id)) },
                             onRemove = { downloadToRemove = item },
                         )
                     }
@@ -284,6 +287,7 @@ private fun DownloadItem(
     item: ManagedDownload,
     onOpen: () -> Unit,
     onRetry: () -> Unit,
+    onPause: () -> Unit,
     onRemove: () -> Unit,
 ) {
     OutlinedCard(
@@ -327,6 +331,16 @@ private fun DownloadItem(
                 if (item.status == DownloadStatus.FAILED) {
                     IconButton(onClick = onRetry) {
                         Icon(NextIcons.Replay, contentDescription = stringResource(R.string.retry))
+                    }
+                }
+                if (item.status == DownloadStatus.PAUSED) {
+                    IconButton(onClick = onRetry) {
+                        Icon(NextIcons.Play, contentDescription = stringResource(R.string.resume))
+                    }
+                }
+                if (item.status == DownloadStatus.RUNNING || item.status == DownloadStatus.PENDING) {
+                    IconButton(onClick = onPause) {
+                        Icon(Icons.Rounded.Pause, contentDescription = stringResource(R.string.pause_download))
                     }
                 }
                 IconButton(onClick = onRemove) {

@@ -11,7 +11,9 @@ The shipped APK is intentionally limited to `armeabi-v7a` (ARMv7).
 ## Custom features
 
 - Paste HTTP, HTTPS, HLS, DASH, or RTSP links in the Network tab and play them directly.
-- Download HTTP and HTTPS files in the background with progress, notifications, retry, open, and remove actions.
+- Download HTTP and HTTPS files in the background with up to 8 range connections and 3 active files, progress, notifications, pause/resume, retry, open, and remove actions.
+- Preserve APK and other real filename extensions, including encoded server filenames and redirected URLs. Generic server MIME types do not rename real extensions to `.bin`.
+- Validate byte ranges and file validators before resuming, retry temporary network failures, and fall back to one connection when a host stops honoring ranges. Paused downloads remain paused when reopening the list.
 - Receive browser links through the dedicated “Download with Player” activity.
 - To choose Player in Firefox's download dialog, enable Settings → Download Settings →
   Manage downloads with another app. The download activity accepts typed HTTP(S)

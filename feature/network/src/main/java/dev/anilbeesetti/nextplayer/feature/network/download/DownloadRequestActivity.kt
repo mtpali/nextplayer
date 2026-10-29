@@ -5,7 +5,6 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.webkit.URLUtil
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,7 +31,7 @@ class DownloadRequestActivity : ComponentActivity() {
             return
         }
 
-        val fileName = URLUtil.guessFileName(url, null, null)
+        val fileName = resolveDownloadFileInfo(url, suggestedName = suggestedName(), mimeTypeHint = downloadMimeType()).name
         AlertDialog.Builder(this)
             .setTitle(R.string.download_with_player)
             .setMessage(getString(R.string.download_confirmation, fileName))
@@ -49,11 +48,16 @@ class DownloadRequestActivity : ComponentActivity() {
     }
 
     private fun startDownload(url: String) {
-        DownloadManagerClient(this).enqueue(url)
+        DownloadManagerClient(this).enqueue(url, suggestedName(), downloadMimeType())
             .onSuccess { Toast.makeText(this, R.string.download_started, Toast.LENGTH_SHORT).show() }
             .onFailure { Toast.makeText(this, R.string.download_failed, Toast.LENGTH_SHORT).show() }
         finish()
     }
+
+    private fun suggestedName(): String? = intent.getStringExtra("com.android.extra.filename")
+        ?: intent.getStringExtra(Intent.EXTRA_TITLE)?.takeIf { mimeTypeForFileName(it) != null }
+
+    private fun downloadMimeType(): String? = intent.type?.takeUnless { it == "text/plain" || it == "*/*" }
 
     private fun extractUrl(intent: Intent): String? {
         val directCandidates = listOfNotNull(

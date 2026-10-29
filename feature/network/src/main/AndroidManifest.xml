@@ -4,7 +4,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <application>
+    <!-- HTTP downloads are explicitly supported; HTTPS keeps the platform's certificate validation. -->
+    <application android:usesCleartextTraffic="true">
         <service
             android:name=".download.SegmentedDownloadService"
             android:exported="false"

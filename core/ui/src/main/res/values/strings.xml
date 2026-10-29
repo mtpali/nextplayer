@@ -405,7 +405,8 @@
     <string name="cannot_open_download">No app can open this file.</string>
     <string name="download_pending">Waiting</string>
     <string name="download_running">Downloading</string>
-    <string name="download_paused">Paused by the system</string>
+    <string name="download_paused">Paused</string>
+    <string name="pause_download">Pause download</string>
     <string name="download_complete">Complete</string>
     <string name="download_progress">%1$d%% downloaded</string>
     <string name="download_size_progress">%1$s / %2$s</string>
@@ -416,7 +417,7 @@
     <string name="remove_download">Remove download?</string>
     <string name="remove_download_confirmation">This removes “%1$s” and its downloaded file.</string>
     <string name="download_with_player">Download with Player</string>
-    <string name="download_confirmation">Download “%1$s” to the Player folder?</string>
+    <string name="download_confirmation">Download “%1$s” to the Downloads folder?</string>
     <string name="take_screenshot">Take screenshot</string>
     <string name="screenshot_saved">Screenshot saved to Pictures/Player</string>
     <string name="screenshot_failed">Couldn’t capture this frame.</string>
