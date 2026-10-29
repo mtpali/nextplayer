@@ -5,4 +5,5 @@ enum class Font {
     MONOSPACE,
     SANS_SERIF,
     SERIF,
+    CUSTOM,
 }

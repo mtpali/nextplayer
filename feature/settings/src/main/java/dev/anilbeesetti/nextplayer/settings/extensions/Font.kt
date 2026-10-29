@@ -12,6 +12,7 @@ fun Font.name(): String {
         Font.MONOSPACE -> R.string.monospace
         Font.SANS_SERIF -> R.string.sans_serif
         Font.SERIF -> R.string.serif
+        Font.CUSTOM -> R.string.subtitle_custom_font
     }
 
     return stringResource(id = stringRes)

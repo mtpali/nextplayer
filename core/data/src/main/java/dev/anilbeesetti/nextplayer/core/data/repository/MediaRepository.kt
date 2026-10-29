@@ -31,9 +31,6 @@ interface MediaRepository {
      */
     fun observeVideos(folderPath: String? = null): Flow<List<Video>>
 
-    fun observePlaybackHistory(): Flow<List<Video>>
-    fun observeTrashVideos(): Flow<List<Video>>
-
     /**
      * Fetches all unique folders containing videos under the given path (one-shot).
      *
@@ -53,7 +50,6 @@ interface MediaRepository {
     suspend fun getVideoByUri(uri: String): Video?
     suspend fun getVideoState(uri: String): VideoState?
     suspend fun getMediaInfo(uri: String): MediaInfo?
-    suspend fun clearPlaybackHistory()
     suspend fun updateMediumLastPlayedTime(uri: String, lastPlayedTime: Long, duration: Long? = null)
     suspend fun updateMediumPosition(uri: String, position: Long)
     suspend fun updateMediumPlaybackSpeed(uri: String, playbackSpeed: Float)

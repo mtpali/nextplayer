@@ -1,5 +1,6 @@
 package dev.anilbeesetti.nextplayer.feature.player
 
+import android.graphics.Rect
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
@@ -41,6 +42,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -112,6 +114,7 @@ import dev.anilbeesetti.nextplayer.feature.player.ui.controls.ControlsTopView
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 val LocalControlsVisibilityState = compositionLocalOf<ControlsVisibilityState?> { null }
@@ -203,6 +206,14 @@ fun MediaPlayerScreen(
     }
 
     var overlayView by remember { mutableStateOf<OverlayView?>(null) }
+    var previewSubtitleTextSize by remember { mutableIntStateOf(playerPreferences.subtitleTextSize) }
+    var previewSubtitleVerticalPosition by remember { mutableIntStateOf(playerPreferences.subtitleVerticalPosition) }
+    LaunchedEffect(playerPreferences.subtitleTextSize) {
+        previewSubtitleTextSize = playerPreferences.subtitleTextSize
+    }
+    LaunchedEffect(playerPreferences.subtitleVerticalPosition) {
+        previewSubtitleVerticalPosition = playerPreferences.subtitleVerticalPosition
+    }
 
     val context = LocalContext.current
     val isTv = remember { context.isTelevision }
@@ -213,6 +224,8 @@ fun MediaPlayerScreen(
     var isPlayPauseFocused by remember { mutableStateOf(false) }
     var isUnlockFocused by remember { mutableStateOf(false) }
     val seekIncrementMs = playerPreferences.seekIncrement.seconds.inWholeMilliseconds
+    val screenshotScope = rememberCoroutineScope()
+    var videoBounds by remember { mutableStateOf<Rect?>(null) }
 
     if (isTv) {
         LaunchedEffect(controlsVisibilityState.controlsVisible, controlsVisibilityState.controlsLocked, overlayView) {
@@ -286,13 +299,20 @@ fun MediaPlayerScreen(
                     videoZoomAndContentScaleState = videoZoomAndContentScaleState,
                     volumeAndBrightnessGestureState = volumeAndBrightnessGestureState,
                     subtitleConfiguration = SubtitleConfiguration(
-                        useSystemCaptionStyle = playerPreferences.useSystemCaptionStyle,
+                        useSystemCaptionStyle = playerPreferences.useSystemCaptionStyle &&
+                            !(overlayView == OverlayView.SUBTITLE_APPEARANCE &&
+                                previewSubtitleTextSize != playerPreferences.subtitleTextSize),
                         showBackground = playerPreferences.subtitleBackground,
                         font = playerPreferences.subtitleFont,
-                        textSize = playerPreferences.subtitleTextSize,
+                        customFontId = playerPreferences.customSubtitleFontId,
+                        textSize = previewSubtitleTextSize,
+                        verticalPosition = previewSubtitleVerticalPosition,
                         textBold = playerPreferences.subtitleTextBold,
+                        textColor = playerPreferences.subtitleTextColor,
+                        blackShadow = playerPreferences.subtitleBlackShadow,
                         applyEmbeddedStyles = playerPreferences.applyEmbeddedStyles,
                     ),
+                    onVideoBoundsChanged = { videoBounds = it },
                 )
 
                 AnimatedVisibility(
@@ -394,9 +414,19 @@ fun MediaPlayerScreen(
                                         controlsVisibilityState.hideControls()
                                         overlayView = OverlayView.PLAYBACK_SPEED
                                     },
-                                    onPlaylistClick = {
-                                        controlsVisibilityState.hideControls()
-                                        overlayView = OverlayView.PLAYLIST
+                                    onScreenshotClick = {
+                                        videoBounds?.let { bounds ->
+                                            controlsVisibilityState.hideControls()
+                                            screenshotScope.launch {
+                                                delay(150)
+                                                val message = when (captureVideoScreenshot(context, bounds)) {
+                                                    is ScreenshotResult.Saved -> coreUiR.string.screenshot_saved
+                                                    ScreenshotResult.Unsupported -> coreUiR.string.screenshot_unsupported
+                                                    ScreenshotResult.Failed -> coreUiR.string.screenshot_failed
+                                                }
+                                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
                                     },
                                     onBackClick = onBackClick,
                                 )
@@ -512,7 +542,15 @@ fun MediaPlayerScreen(
                 onVideoDecoderModeSelected = decoderState::switchVideoTo,
                 onAudioDecoderModeSelected = decoderState::switchAudioTo,
                 onSelectSubtitleClick = onSelectSubtitleClick,
+                onAdjustSubtitleClick = { overlayView = OverlayView.SUBTITLE_APPEARANCE },
                 onSubtitleOptionEvent = viewModel::onSubtitleOptionEvent,
+                subtitleTextSize = previewSubtitleTextSize,
+                subtitleVerticalPosition = previewSubtitleVerticalPosition,
+                useSystemCaptionStyle = playerPreferences.useSystemCaptionStyle,
+                onSubtitleTextSizePreview = { previewSubtitleTextSize = it },
+                onSubtitleVerticalPositionPreview = { previewSubtitleVerticalPosition = it },
+                onSubtitleTextSizeSelected = viewModel::updateSubtitleTextSize,
+                onSubtitleVerticalPositionSelected = viewModel::updateSubtitleVerticalPosition,
                 onVideoContentScaleChanged = { videoZoomAndContentScaleState.onVideoContentScaleChanged(it) },
             )
         }

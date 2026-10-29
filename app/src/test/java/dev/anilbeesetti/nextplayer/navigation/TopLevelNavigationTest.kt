@@ -3,7 +3,8 @@ package dev.anilbeesetti.nextplayer.navigation
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import dev.anilbeesetti.nextplayer.feature.playlist.navigation.PlaylistDetailRoute
+import dev.anilbeesetti.nextplayer.settings.navigation.SettingsRoute
+import dev.anilbeesetti.nextplayer.settings.navigation.SubtitlePreferencesRoute
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -14,16 +15,14 @@ class TopLevelNavigationTest {
         assertEquals(
             listOf(
                 TopLevelDestination.MEDIA,
-                TopLevelDestination.PLAYLISTS,
                 TopLevelDestination.NETWORK,
-                TopLevelDestination.MORE,
             ),
             TopLevelDestination.entries,
         )
     }
 
     @Test
-    fun switchingTabsPreservesPlaylistDetailStack() {
+    fun switchingTabsPreservesSettingsStackNestedUnderHome() {
         val stacks = TopLevelDestination.entries.associate { destination ->
             destination.route to NavBackStack<NavKey>(destination.route)
         }
@@ -32,17 +31,31 @@ class TopLevelNavigationTest {
             backStacks = stacks,
             selectedIndexState = mutableIntStateOf(0),
         )
-        val playlistStack = stacks.getValue(TopLevelDestination.PLAYLISTS.route)
+        val mediaStack = stacks.getValue(TopLevelDestination.MEDIA.route)
 
-        state.switchTo(TopLevelDestination.PLAYLISTS.route)
-        playlistStack += PlaylistDetailRoute(7)
+        mediaStack += SettingsRoute
+        mediaStack += SubtitlePreferencesRoute
+        state.switchTo(TopLevelDestination.NETWORK.route)
         state.switchTo(TopLevelDestination.MEDIA.route)
-        state.switchTo(TopLevelDestination.PLAYLISTS.route)
 
         assertEquals(
-            listOf(TopLevelDestination.PLAYLISTS.route, PlaylistDetailRoute(7)),
+            listOf(TopLevelDestination.MEDIA.route, SettingsRoute, SubtitlePreferencesRoute),
             state.currentStack,
         )
+    }
+
+    @Test
+    fun restoringARemovedTabReturnsToHome() {
+        val stacks = TopLevelDestination.entries.associate { destination ->
+            destination.route to NavBackStack<NavKey>(destination.route)
+        }
+        val state = TopLevelNavState(
+            destinations = TopLevelDestination.entries,
+            backStacks = stacks,
+            selectedIndexState = mutableIntStateOf(2),
+        )
+
+        assertEquals(TopLevelDestination.MEDIA.route, state.topLevelRoute)
     }
 
     @Test

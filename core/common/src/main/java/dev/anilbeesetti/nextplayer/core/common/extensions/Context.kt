@@ -275,7 +275,7 @@ suspend fun Context.scanStorage(
 suspend fun Context.convertToUTF8(uri: Uri, charset: Charset? = null): Uri = withContext(Dispatchers.IO) {
     try {
         when {
-            uri.scheme?.let { it in listOf("http", "https", "ftp") } == true -> {
+            uri.scheme?.let { it in listOf("http", "https") } == true -> {
                 val url = URL(uri.toString())
                 val detectedCharset = charset ?: detectCharset(url)
                 if (detectedCharset == StandardCharsets.UTF_8) {

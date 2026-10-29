@@ -2,13 +2,10 @@ package dev.anilbeesetti.nextplayer
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
-import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithContentDescription
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import dev.anilbeesetti.nextplayer.core.common.storagePermission
@@ -33,21 +30,6 @@ class MainActivityNavigationTest {
         composeRule.onNodeWithContentDescription(settings).performClick()
 
         composeRule.onNodeWithText(settings).assertIsDisplayed()
-    }
-
-    @Test
-    fun vaultOpensAfterActivityRecreation() {
-        recreateHome()
-        val appName = composeRule.activity.getString(R.string.app_name)
-        val enterPin = composeRule.activity.getString(R.string.enter_vault_pin)
-        val setPin = composeRule.activity.getString(R.string.set_vault_pin)
-
-        composeRule.onNodeWithText(appName).performTouchInput { longClick() }
-
-        composeRule.waitUntil(10_000) {
-            composeRule.onAllNodesWithText(enterPin).fetchSemanticsNodes().isNotEmpty() ||
-                composeRule.onAllNodesWithText(setPin).fetchSemanticsNodes().isNotEmpty()
-        }
     }
 
     private fun recreateHome() {

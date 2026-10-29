@@ -1,22 +1,30 @@
 package dev.anilbeesetti.nextplayer.core.media.services
 
+import android.Manifest
 import android.app.Activity
+import android.app.PendingIntent
+import android.app.RecoverableSecurityException
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.provider.BaseColumns
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.webkit.MimeTypeMap
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dev.anilbeesetti.nextplayer.core.common.extensions.deleteMedia
 import dev.anilbeesetti.nextplayer.core.common.extensions.getFilenameFromUri
 import dev.anilbeesetti.nextplayer.core.common.extensions.getPath
 import dev.anilbeesetti.nextplayer.core.common.extensions.scanPaths
@@ -27,20 +35,18 @@ import java.io.InputStream
 import java.io.OutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.resume
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 @Singleton
@@ -50,32 +56,77 @@ class LocalMediaOperationsService @Inject constructor(
 
     private lateinit var activity: Activity
     private val contentResolver = context.contentResolver
-    private var resultOkCallback: () -> Unit = {}
-    private var resultCancelledCallback: () -> Unit = {}
+    private val activityRequestMutex = Mutex()
+    private var pendingActivityResult: CompletableDeferred<Boolean>? = null
     private var mediaRequestLauncher: ActivityResultLauncher<IntentSenderRequest>? = null
+    private var writePermissionLauncher: ActivityResultLauncher<String>? = null
 
     override fun initialize(activity: ComponentActivity) {
+        initialize(activity, activity.activityResultRegistry)
+    }
+
+    internal fun initialize(activity: ComponentActivity, registry: ActivityResultRegistry) {
         this.activity = activity
         mediaRequestLauncher = activity.registerForActivityResult(
             ActivityResultContracts.StartIntentSenderForResult(),
+            registry,
         ) { result ->
-            when (result.resultCode) {
-                Activity.RESULT_OK -> resultOkCallback()
-                Activity.RESULT_CANCELED -> resultCancelledCallback()
+            pendingActivityResult?.complete(result.resultCode == Activity.RESULT_OK)
+        }
+        writePermissionLauncher = activity.registerForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+            registry,
+        ) { granted -> pendingActivityResult?.complete(granted) }
+        activity.lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onDestroy(owner: LifecycleOwner) {
+                if (this@LocalMediaOperationsService.activity === activity) {
+                    pendingActivityResult?.complete(false)
+                    mediaRequestLauncher = null
+                    writePermissionLauncher = null
+                }
+            }
+        })
+    }
+
+    override suspend fun deleteMedia(uris: List<Uri>, permanently: Boolean): Boolean = withContext(Dispatchers.IO) {
+        return@withContext try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (permanently) deleteMediaR(uris) else trashMediaR(uris)
+            } else {
+                deleteMediaBelowR(uris)
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    /** Keep a cancelled request registered until its result arrives, so it cannot finish a later request. */
+    private suspend fun awaitActivityResult(launch: () -> Unit): Boolean = withContext(Dispatchers.Main.immediate) {
+        activityRequestMutex.withLock {
+            val result = CompletableDeferred<Boolean>()
+            pendingActivityResult = result
+            try {
+                launch()
+                withContext(NonCancellable) { result.await() }
+            } finally {
+                pendingActivityResult = null
             }
         }
     }
 
-    override suspend fun deleteMedia(uris: List<Uri>, permanently: Boolean): Boolean = withContext(Dispatchers.IO) {
-        return@withContext if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (permanently) deleteMediaR(uris) else trashMediaR(uris)
-        } else {
-            deleteMediaBelowR(uris)
-        }
+    private suspend fun requestMediaPermission(intent: PendingIntent): Boolean = awaitActivityResult {
+        checkNotNull(mediaRequestLauncher).launch(IntentSenderRequest.Builder(intent).build())
     }
 
-    override suspend fun restoreMedia(uris: List<Uri>): Boolean = withContext(Dispatchers.IO) {
-        return@withContext Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && trashMediaR(uris, trashed = false)
+    private suspend fun requestLegacyWritePermission(): Boolean {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            return true
+        }
+        return awaitActivityResult {
+            checkNotNull(writePermissionLauncher).launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
     }
 
     override suspend fun renameMedia(uri: Uri, to: String): Boolean = withContext(Dispatchers.IO) {
@@ -353,39 +404,8 @@ class LocalMediaOperationsService @Inject constructor(
     )
 
     @RequiresApi(Build.VERSION_CODES.R)
-    private suspend fun requestWriteR(uris: List<Uri>): Boolean = suspendCancellableCoroutine { continuation ->
-        launchWriteRequest(
-            uris = uris,
-            onResultOk = { continuation.resume(true) },
-            onResultCanceled = { continuation.resume(false) },
-        )
-    }
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    private fun launchWriteRequest(
-        uris: List<Uri>,
-        onResultCanceled: () -> Unit = {},
-        onResultOk: () -> Unit = {},
-    ) {
-        resultOkCallback = onResultOk
-        resultCancelledCallback = onResultCanceled
-        MediaStore.createWriteRequest(contentResolver, uris).also { intent ->
-            mediaRequestLauncher?.launch(IntentSenderRequest.Builder(intent).build())
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    private fun launchDeleteRequest(
-        uris: List<Uri>,
-        onResultCanceled: () -> Unit = {},
-        onResultOk: () -> Unit = {},
-    ) {
-        resultOkCallback = onResultOk
-        resultCancelledCallback = onResultCanceled
-        MediaStore.createDeleteRequest(contentResolver, uris).also { intent ->
-            mediaRequestLauncher?.launch(IntentSenderRequest.Builder(intent).build())
-        }
-    }
+    private suspend fun requestWriteR(uris: List<Uri>): Boolean =
+        requestMediaPermission(MediaStore.createWriteRequest(contentResolver, uris))
 
     @RequiresApi(Build.VERSION_CODES.R)
     private suspend fun deleteMediaR(uris: List<Uri>): Boolean = runMediaRequests(
@@ -402,58 +422,55 @@ class LocalMediaOperationsService @Inject constructor(
     )
 
     @RequiresApi(Build.VERSION_CODES.R)
-    private suspend fun requestTrashR(uris: List<Uri>, trashed: Boolean): Boolean = suspendCancellableCoroutine { continuation ->
-        resultOkCallback = { continuation.resume(true) }
-        resultCancelledCallback = { continuation.resume(false) }
-        MediaStore.createTrashRequest(contentResolver, uris, trashed).also { intent ->
-            mediaRequestLauncher?.launch(IntentSenderRequest.Builder(intent).build())
-        }
-    }
+    private suspend fun requestTrashR(uris: List<Uri>, trashed: Boolean): Boolean =
+        requestMediaPermission(MediaStore.createTrashRequest(contentResolver, uris, trashed))
 
     @RequiresApi(Build.VERSION_CODES.R)
-    private suspend fun requestDeleteR(uris: List<Uri>): Boolean = suspendCancellableCoroutine { continuation ->
-        launchDeleteRequest(
-            uris = uris,
-            onResultOk = { continuation.resume(true) },
-            onResultCanceled = { continuation.resume(false) },
-        )
+    private suspend fun requestDeleteR(uris: List<Uri>): Boolean =
+        requestMediaPermission(MediaStore.createDeleteRequest(contentResolver, uris))
+
+    private fun mediaExists(uri: Uri): Boolean {
+        val cursor = checkNotNull(
+            contentResolver.query(
+                uri,
+                arrayOf(BaseColumns._ID),
+                null,
+                null,
+                null,
+            ),
+        ) { "Unable to check whether the video exists" }
+        return cursor.use { it.moveToFirst() }
     }
 
-    private fun mediaExists(uri: Uri): Boolean = runCatching {
-        contentResolver.query(
-            uri,
-            arrayOf(BaseColumns._ID),
-            null,
-            null,
-            null,
-        )?.use { cursor -> cursor.moveToFirst() } == true
-    }.getOrDefault(false)
-
     private suspend fun deleteMediaBelowR(uris: List<Uri>): Boolean {
-        return uris.map { uri ->
-            contentResolver.deleteMedia(uri)
+        if (uris.isEmpty()) return true
+        val legacyStorage = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || Environment.isExternalStorageLegacy()
+        if (legacyStorage && !requestLegacyWritePermission()) return false
+
+        return uris.distinct().map { uri ->
+            val deleted = try {
+                contentResolver.delete(uri, null, null)
+            } catch (e: SecurityException) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && e is RecoverableSecurityException) {
+                    if (!requestMediaPermission(e.userAction.actionIntent)) return false
+                    contentResolver.delete(uri, null, null)
+                } else {
+                    throw e
+                }
+            }
+            deleted > 0 || !mediaExists(uri)
         }.all { it }
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    private suspend fun renameMediaR(uri: Uri, to: String): Boolean = suspendCancellableCoroutine { continuation ->
-        val scope = CoroutineScope(Dispatchers.Default)
-        launchWriteRequest(
-            uris = listOf(uri),
-            onResultOk = {
-                scope.launch {
-                    val result = contentResolver.updateMedia(
-                        uri = uri,
-                        contentValues = ContentValues().apply {
-                            put(MediaStore.MediaColumns.DISPLAY_NAME, to)
-                        },
-                    )
-                    continuation.resume(result)
-                }
+    private suspend fun renameMediaR(uri: Uri, to: String): Boolean {
+        if (!requestWriteR(listOf(uri))) return false
+        return contentResolver.updateMedia(
+            uri = uri,
+            contentValues = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, to)
             },
-            onResultCanceled = { continuation.resume(false) },
         )
-        continuation.invokeOnCancellation { scope.cancel() }
     }
 
     private suspend fun renameMediaBelowR(uri: Uri, to: String): Boolean {

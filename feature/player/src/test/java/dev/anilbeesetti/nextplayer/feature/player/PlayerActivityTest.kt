@@ -7,23 +7,23 @@ import org.junit.Test
 class PlayerActivityTest {
 
     @Test
-    fun currentUriWithExplicitPlaylistStartsNewPlaybackQueue() {
+    fun currentUriWithExplicitQueueStartsNewPlaybackQueue() {
         assertFalse(
             shouldResumeExistingPlayback(
                 returningFromBackground = false,
                 isRequestedUriCurrent = true,
-                hasExplicitPlaylist = true,
+                hasExplicitQueue = true,
             ),
         )
     }
 
     @Test
-    fun currentUriWithoutExplicitPlaylistResumesExistingPlayback() {
+    fun currentUriWithoutExplicitQueueResumesExistingPlayback() {
         assertTrue(
             shouldResumeExistingPlayback(
                 returningFromBackground = false,
                 isRequestedUriCurrent = true,
-                hasExplicitPlaylist = false,
+                hasExplicitQueue = false,
             ),
         )
     }
@@ -34,7 +34,7 @@ class PlayerActivityTest {
             shouldResumeExistingPlayback(
                 returningFromBackground = true,
                 isRequestedUriCurrent = true,
-                hasExplicitPlaylist = true,
+                hasExplicitQueue = true,
             ),
         )
     }

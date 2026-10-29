@@ -9,9 +9,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 object TopLevelFabKey {
     const val MEDIA = "media"
-    const val PLAYLISTS = "playlists"
     const val NETWORK = "network"
-    const val MORE = "more"
 }
 
 data class TopLevelFabState(
