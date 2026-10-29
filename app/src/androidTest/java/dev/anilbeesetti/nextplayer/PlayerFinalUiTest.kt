@@ -4,6 +4,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
@@ -53,7 +54,6 @@ class PlayerFinalUiTest {
         listOf(
             R.string.videos,
             R.string.list,
-            R.string.date,
             R.string.newest,
             R.string.duration,
             R.string.folder_duration,
@@ -66,6 +66,7 @@ class PlayerFinalUiTest {
         ).forEach { resource ->
             composeRule.onAllNodesWithText(text(resource)).filter(isSelected()).assertCountEquals(1)
         }
+        composeRule.onNodeWithContentDescription(text(R.string.date)).assertIsOn()
     }
 
     private fun text(resource: Int): String = composeRule.activity.getString(resource)

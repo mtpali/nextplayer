@@ -48,7 +48,7 @@ class MediaPickerScreenTest {
     @Test
     fun longPressMenuOmitsPlayCopyAndMove() {
         showVideo()
-        composeRule.onNodeWithText("Clip").performTouchInput { longClick() }
+        composeRule.onNodeWithText("Clip.mp4").performTouchInput { longClick() }
 
         listOf("Play", "Copy", "Move").forEach { title ->
             composeRule.onNodeWithText(title).assertDoesNotExist()
@@ -62,7 +62,7 @@ class MediaPickerScreenTest {
     fun confirmingDeleteRetainsTheSelectedVideoUri() {
         val actions = mutableListOf<MediaPickerAction>()
         val video = showVideo(actions::add)
-        composeRule.onNodeWithText("Clip").performTouchInput { longClick() }
+        composeRule.onNodeWithText("Clip.mp4").performTouchInput { longClick() }
         composeRule.onNodeWithText("Delete").performClick()
         composeRule.onNode(isToggleable()).performClick()
         composeRule.onNode(hasText("Delete") and hasAnyAncestor(isDialog())).performClick()
@@ -77,7 +77,7 @@ class MediaPickerScreenTest {
     fun cancellingDeletePreservesTheVideoSelection() {
         val actions = mutableListOf<MediaPickerAction>()
         showVideo(actions::add)
-        composeRule.onNodeWithText("Clip").performTouchInput { longClick() }
+        composeRule.onNodeWithText("Clip.mp4").performTouchInput { longClick() }
         composeRule.onNodeWithText("Delete").performClick()
         composeRule.onNodeWithText("Cancel").performClick()
 
@@ -121,10 +121,10 @@ class MediaPickerScreenTest {
             }
         }
 
-        composeRule.onNodeWithText("Clip").requestFocus()
+        composeRule.onNodeWithText("Clip.mp4").requestFocus()
         composeRule.onNodeWithContentDescription("Play").requestFocus()
         composeRule.onRoot().performKeyInput { pressKey(Key.DirectionUp) }
-        composeRule.onNodeWithText("Clip").assertIsFocused()
+        composeRule.onNodeWithText("Clip.mp4").assertIsFocused()
     }
 
     @Test
@@ -164,5 +164,4 @@ class MediaPickerScreenTest {
 
         assertTrue(MediaPickerAction.OnPermissionAccepted in actions)
     }
-
 }
