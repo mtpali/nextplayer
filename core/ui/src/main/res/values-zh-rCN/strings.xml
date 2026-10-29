@@ -343,16 +343,9 @@
     <string name="audio_decoder">音频解码器</string>
     <string name="video_decoder">视频解码器</string>
     <string name="select_decoders">选择解码器</string>
-    <string name="history">历史</string>
     <string name="delete_permanently">永久删除</string>
-    <string name="restore">恢复</string>
-    <string name="trash">回收站</string>
     <string name="settings_description">应用偏好</string>
-    <string name="more">更多</string>
     <string name="move_to_trash">移动到回收站</string>
     <string name="move_to_trash_info">所选项目会被移动到回收站</string>
     <string name="clear_all">全部清除</string>
-    <string name="clear_history_confirmation">从历史移除所有观看过的视频吗？</string>
-    <string name="trash_empty_description">您移动到回收站的视频会在此显示。您可以将其恢复或永久删除。</string>
-    <string name="trash_empty_title">回收站为空</string>
 </resources>

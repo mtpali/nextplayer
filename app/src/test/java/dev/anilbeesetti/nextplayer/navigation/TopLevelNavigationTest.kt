@@ -16,14 +16,13 @@ class TopLevelNavigationTest {
             listOf(
                 TopLevelDestination.MEDIA,
                 TopLevelDestination.NETWORK,
-                TopLevelDestination.MORE,
             ),
             TopLevelDestination.entries,
         )
     }
 
     @Test
-    fun switchingTabsPreservesSettingsStackNestedUnderMore() {
+    fun switchingTabsPreservesSettingsStackNestedUnderHome() {
         val stacks = TopLevelDestination.entries.associate { destination ->
             destination.route to NavBackStack<NavKey>(destination.route)
         }
@@ -32,18 +31,31 @@ class TopLevelNavigationTest {
             backStacks = stacks,
             selectedIndexState = mutableIntStateOf(0),
         )
-        val moreStack = stacks.getValue(TopLevelDestination.MORE.route)
+        val mediaStack = stacks.getValue(TopLevelDestination.MEDIA.route)
 
-        state.switchTo(TopLevelDestination.MORE.route)
-        moreStack += SettingsRoute
-        moreStack += SubtitlePreferencesRoute
+        mediaStack += SettingsRoute
+        mediaStack += SubtitlePreferencesRoute
+        state.switchTo(TopLevelDestination.NETWORK.route)
         state.switchTo(TopLevelDestination.MEDIA.route)
-        state.switchTo(TopLevelDestination.MORE.route)
 
         assertEquals(
-            listOf(TopLevelDestination.MORE.route, SettingsRoute, SubtitlePreferencesRoute),
+            listOf(TopLevelDestination.MEDIA.route, SettingsRoute, SubtitlePreferencesRoute),
             state.currentStack,
         )
+    }
+
+    @Test
+    fun restoringARemovedTabReturnsToHome() {
+        val stacks = TopLevelDestination.entries.associate { destination ->
+            destination.route to NavBackStack<NavKey>(destination.route)
+        }
+        val state = TopLevelNavState(
+            destinations = TopLevelDestination.entries,
+            backStacks = stacks,
+            selectedIndexState = mutableIntStateOf(2),
+        )
+
+        assertEquals(TopLevelDestination.MEDIA.route, state.topLevelRoute)
     }
 
     @Test

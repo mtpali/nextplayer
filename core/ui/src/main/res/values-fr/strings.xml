@@ -288,7 +288,6 @@
     <string name="folder_duration">Durée répertoire</string>
     <string name="gestures_name">Gestes</string>
     <string name="gestures_description">Configurer les gestes du lecteur</string>
-    <string name="history">Historique</string>
     <string name="select_decoders">Sélectionner un décodeur</string>
     <string name="video_decoder">Décodeur vidéo</string>
     <string name="audio_decoder">Décodeur audio</string>
@@ -302,8 +301,6 @@
     <string name="audio_decoder_mode_not_supported">Le décodeur audio %1$s n\'est pas supporté</string>
     <string name="no_supported_decoder">Aucun décodeur n\'est disponible pour ce fichier.</string>
     <string name="delete_permanently">Supprimer définitivement</string>
-    <string name="restore">Restaurer</string>
-    <string name="trash">Corbeille</string>
     <string name="move_to_trash">Placer dans la corbeille</string>
     <string name="move_to_trash_info">Les éléments sélectionnés vont être placés dans la corbeille.</string>
     <string name="reset_controller_timeout">Réinitialiser le délai d\'attente du contrôleur</string>
@@ -312,6 +309,5 @@
     <string name="brightness_gesture_sensitivity">Sensibilité du mouvement de contrôle de la luminosité</string>
     <string name="reset_brightness_gesture_sensitivity">Réinitialiser la sensibilité du mouvement de contrôle de la luminosité</string>
     <string name="clear_all">Tout effacer</string>
-    <string name="clear_history_confirmation">Nettoyer tout l\'historique des vidéos regardées ?</string>
     <string name="material_you_controls_description">Utiliser l\'apparence Material You des contrôles</string>
 </resources>

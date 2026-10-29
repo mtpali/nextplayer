@@ -358,16 +358,9 @@
     <string name="audio_decoder_mode_not_supported">Dekoder dźwięku %1$s nie jest obsługiwany</string>
     <string name="no_supported_decoder">Dla tego pliku multimedialnego nie jest dostępny żaden obsługiwany dekoder.</string>
     <string name="decoder_mode_auto">Automatycznie</string>
-    <string name="history">Historia</string>
     <string name="delete_permanently">Usuń bezpowrotnie</string>
-    <string name="restore">Przywróć</string>
-    <string name="trash">Kosz</string>
     <string name="move_to_trash">Przenieś do kosza</string>
     <string name="move_to_trash_info">Zaznaczone elementy zostaną przeniesione do kosza.</string>
     <string name="clear_all">Wyczyść wszystko</string>
-    <string name="clear_history_confirmation">Usunąć wszystkie obejrzane wideo z historii?</string>
     <string name="settings_description">Ustawienia aplikacji</string>
-    <string name="more">Więcej</string>
-    <string name="trash_empty_title">Kosz jest pusty</string>
-    <string name="trash_empty_description">Wideo przeniesione do kosza pojawią się w tym miejscu. Możesz je przywrócić lub trwale usunąć.</string>
 </resources>

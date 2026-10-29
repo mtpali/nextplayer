@@ -45,18 +45,8 @@ class TopLevelFabFocusTest {
     fun networkFabUpReturnsToContent() = checkFabUp(tabIndex = 1)
 
     @Test
-    fun moreFabUpReturnsToContent() = checkFabUp(tabIndex = 2)
-
-    @Test
-    fun openingMoreKeepsFabUpInItsContentAfterSwitchingTabs() {
-        composeRule.onAllNodes(tab)[2].performClick()
-        composeRule.onAllNodes(tab)[0].performClick()
-        checkFabUp(2)
-    }
-
-    @Test
     fun switchingTabsKeepsFabUpInTheCurrentScreen() {
-        listOf(1, 0, 2, 1, 0, 2).forEach(::checkFabUp)
+        listOf(1, 0, 1, 0).forEach(::checkFabUp)
     }
 
     private fun checkFabUp(tabIndex: Int) {

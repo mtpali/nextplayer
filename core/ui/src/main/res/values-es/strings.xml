@@ -354,15 +354,8 @@
     <string name="no_supported_decoder">No hay ningún decodificador compatible disponible para este contenido.</string>
     <string name="decoder_mode_auto">Automático</string>
     <string name="delete_permanently">Eliminar permanentemente</string>
-    <string name="restore">Restaurar</string>
-    <string name="trash">Papelera</string>
     <string name="move_to_trash_info">Los elementos seleccionados se moverán a la papelera.</string>
     <string name="move_to_trash">Mover a la papelera</string>
-    <string name="history">Historial</string>
-    <string name="trash_empty_title">La papelera está vacía</string>
-    <string name="trash_empty_description">Los vídeos que muevas a la papelera aparecerán aquí. Puedes restaurarlos o eliminarlos permanentemente.</string>
     <string name="clear_all">Borrar todo</string>
-    <string name="clear_history_confirmation">¿Eliminar todos los vídeos vistos del historial?</string>
     <string name="settings_description">Preferencias de la aplicación</string>
-    <string name="more">Más</string>
 </resources>

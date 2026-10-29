@@ -129,10 +129,6 @@ class LocalMediaOperationsService @Inject constructor(
         }
     }
 
-    override suspend fun restoreMedia(uris: List<Uri>): Boolean = withContext(Dispatchers.IO) {
-        return@withContext Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && trashMediaR(uris, trashed = false)
-    }
-
     override suspend fun renameMedia(uri: Uri, to: String): Boolean = withContext(Dispatchers.IO) {
         return@withContext if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             renameMediaR(uri, to)

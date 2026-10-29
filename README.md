@@ -11,7 +11,7 @@ The shipped APK is intentionally limited to `armeabi-v7a` (ARMv7).
 ## Custom features
 
 - Paste HTTP, HTTPS, HLS, DASH, or RTSP links in the Network tab and play them directly.
-- Download HTTP and HTTPS files in the background with up to 8 range connections and 3 active files, progress, notifications, pause/resume, retry, open, and remove actions.
+- Download HTTP and HTTPS files in the background with up to 8 range connections and 3 active files, progress, notifications, pause/resume, retry, open, and remove actions. Cancel active, queued, or paused downloads from their notification to discard the transfer and its temporary files.
 - Preserve APK and other real filename extensions, including encoded server filenames and redirected URLs. Generic server MIME types do not rename real extensions to `.bin`.
 - Validate byte ranges and file validators before resuming, retry temporary network failures, and fall back to one connection when a host stops honoring ranges. Paused downloads remain paused when reopening the list.
 - Receive browser links through the dedicated “Download with Player” activity.
@@ -28,6 +28,8 @@ The shipped APK is intentionally limited to `armeabi-v7a` (ARMv7).
   required Android permission and refreshes the library; failed requests show a message.
 - Show Mobile Tina Instagram and developer Telegram destinations in a modern About screen.
 - Minify, shrink, rename, and repackage release code with R8.
+- Keep navigation to Home and Network. The More tab and its History and Trash screens have been removed from the source.
+- Start with Videos, List layout, Date / Newest sorting, and all eight metadata fields enabled. Apply these defaults once when upgrading; later Quick settings changes remain saved.
 
 The legacy SMB, FTP, SFTP, and WebDAV browsing and playback implementation and its
 third-party protocol dependencies have been removed.

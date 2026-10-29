@@ -12,6 +12,7 @@ import dagger.hilt.components.SingletonComponent
 import dev.anilbeesetti.nextplayer.core.common.Dispatcher
 import dev.anilbeesetti.nextplayer.core.common.NextDispatchers
 import dev.anilbeesetti.nextplayer.core.common.di.ApplicationScope
+import dev.anilbeesetti.nextplayer.core.datastore.migration.QuickSettingsDefaultsMigration
 import dev.anilbeesetti.nextplayer.core.datastore.serializer.ApplicationPreferencesSerializer
 import dev.anilbeesetti.nextplayer.core.datastore.serializer.PlayerPreferencesSerializer
 import dev.anilbeesetti.nextplayer.core.datastore.serializer.SearchHistorySerializer
@@ -39,6 +40,7 @@ object DataStoreModule {
     ): DataStore<ApplicationPreferences> {
         return DataStoreFactory.create(
             serializer = ApplicationPreferencesSerializer,
+            migrations = listOf(QuickSettingsDefaultsMigration),
             scope = CoroutineScope(scope.coroutineContext + ioDispatcher),
             produceFile = { context.dataStoreFile(APP_PREFERENCES_DATASTORE_FILE) },
         )

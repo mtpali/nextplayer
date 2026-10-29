@@ -75,7 +75,6 @@ import dev.anilbeesetti.nextplayer.navigation.NextNavigationRail
 import dev.anilbeesetti.nextplayer.navigation.TopLevelDestination
 import dev.anilbeesetti.nextplayer.navigation.TopLevelNavState
 import dev.anilbeesetti.nextplayer.navigation.mediaNavGraph
-import dev.anilbeesetti.nextplayer.navigation.moreNavGraph
 import dev.anilbeesetti.nextplayer.navigation.navigationTransition
 import dev.anilbeesetti.nextplayer.navigation.networkNavGraph
 import dev.anilbeesetti.nextplayer.navigation.rememberTopLevelNavState
@@ -135,12 +134,10 @@ class MainActivity : FragmentActivity() {
 
                     val mediaStack = navState.backStacks.getValue(TopLevelDestination.MEDIA.route)
                     val networkStack = navState.backStacks.getValue(TopLevelDestination.NETWORK.route)
-                    val moreStack = navState.backStacks.getValue(TopLevelDestination.MORE.route)
 
                     val provider = entryProvider {
                         mediaNavGraph(context = this@MainActivity, backStack = mediaStack)
                         networkNavGraph(context = this@MainActivity, backStack = networkStack)
-                        moreNavGraph(context = this@MainActivity, backStack = moreStack)
                         settingsNavGraph(backStack = navState.currentStack)
                     }
 

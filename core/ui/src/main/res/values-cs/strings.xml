@@ -352,18 +352,11 @@
     <string name="audio_decoder_mode_not_supported">%1$s dekodér zvuku není podporován</string>
     <string name="no_supported_decoder">Žádný podporovaný dekodér není dostupný pro tento soubor.</string>
     <string name="decoder_mode_auto">Automatický</string>
-    <string name="more">Více</string>
-    <string name="history">Historie</string>
     <string name="clear_all">Vymazat vše</string>
-    <string name="clear_history_confirmation">Odstranit všechny zhlédnuté videa z historie?</string>
     <string name="settings_description">Možnosti aplikace</string>
-    <string name="trash">Koš</string>
     <string name="move_to_trash">Přesunout do koše</string>
     <string name="move_to_trash_info">Vybrané položky budou přesunuty do koše.</string>
-    <string name="trash_empty_title">Koš je prázdný</string>
-    <string name="trash_empty_description">Videa které přesunete do koše se budou zobrazovat zde. Můžete je obnovit nebo nenávratně odstranit.</string>
     <string name="delete_permanently">Odstranit nenávratně</string>
-    <string name="restore">Obnovit</string>
     <string name="system_volume_panel_desc">Zobrazit systémový panel hlasitosti při nastavování hlasitosti se sluchátkáma</string>
     <string name="system_volume_panel">Systémový panel hlasitosti</string>
 </resources>

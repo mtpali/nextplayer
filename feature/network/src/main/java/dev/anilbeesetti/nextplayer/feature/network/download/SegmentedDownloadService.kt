@@ -88,8 +88,12 @@ class SegmentedDownloadService : Service() {
     private fun startDownload(id: Long) {
         val previous = jobs[id]
         if (previous?.isActive == true) return
-        val record = store.get(id) ?: return
-        if (record.status == DownloadStatus.SUCCESSFUL) return
+        if (store.get(id)?.status == DownloadStatus.SUCCESSFUL) return
+        val record = synchronized(notificationLock) {
+            cancelledDownloads.remove(id)
+            store.update(id) { it.copy(status = DownloadStatus.PENDING, bytesPerSecond = 0L) }
+        } ?: return
+        showNotification(record)
         val client = DownloadHttpClient()
         val job = serviceScope.launch(start = CoroutineStart.LAZY) {
             try {
@@ -97,7 +101,6 @@ class SegmentedDownloadService : Service() {
                 previous?.join()
                 coroutineContext.ensureActive()
                 if (store.get(id) == null) return@launch
-                cancelledDownloads.remove(id)
                 clients[id] = client
                 downloadSlots.withPermit {
                     store.get(id)?.let { download(it, client) }
@@ -129,17 +132,23 @@ class SegmentedDownloadService : Service() {
     }
 
     private fun cancelDownload(id: Long, showPaused: Boolean = false) {
-        synchronized(notificationLock) {
+        val paused = synchronized(notificationLock) {
             if (store.get(id)?.status == DownloadStatus.SUCCESSFUL) return
             cancelledDownloads.add(id)
             notificationManager.cancel(notificationId(id))
+            if (showPaused) {
+                store.update(id) { record -> record.copy(status = DownloadStatus.PAUSED, bytesPerSecond = 0L) }
+            } else {
+                store.remove(id)
+                null
+            }
         }
         jobs[id]?.cancel()
         clients[id]?.cancel()
-        val paused = store.update(id) { record ->
-            record.copy(status = DownloadStatus.PAUSED, bytesPerSecond = 0L)
+        if (!showPaused && jobs[id] == null) {
+            downloadPartsDirectory(this, id).deleteRecursively()
         }
-        if (showPaused && paused != null) showNotification(paused)
+        paused?.let(::showNotification)
     }
 
     private suspend fun download(initialRecord: PersistedDownload, client: DownloadHttpClient) {
@@ -288,6 +297,15 @@ class SegmentedDownloadService : Service() {
     }
 
     private fun showNotification(record: PersistedDownload) {
+        val notification = buildDownloadNotification(record)
+        synchronized(notificationLock) {
+            if (store.get(record.id) != null && (!cancelledDownloads.contains(record.id) || record.status == DownloadStatus.PAUSED)) {
+                notificationManager.notify(notificationId(record.id), notification)
+            }
+        }
+    }
+
+    internal fun buildDownloadNotification(record: PersistedDownload): Notification {
         val progress = if (record.totalBytes > 0L) {
             ((record.downloadedBytes * 1000L) / record.totalBytes).toInt().coerceIn(0, 1000)
         } else {
@@ -320,7 +338,7 @@ class SegmentedDownloadService : Service() {
         if (record.status == DownloadStatus.RUNNING || record.status == DownloadStatus.PENDING) {
             builder.setProgress(1000, progress, record.totalBytes <= 0L)
             builder.addAction(
-                android.R.drawable.ic_menu_close_clear_cancel,
+                android.R.drawable.ic_media_pause,
                 getString(R.string.pause_download),
                 actionPendingIntent(record.id, ACTION_PAUSE),
             )
@@ -328,11 +346,14 @@ class SegmentedDownloadService : Service() {
         if (record.status == DownloadStatus.PAUSED) {
             builder.addAction(android.R.drawable.ic_media_play, getString(R.string.resume), actionPendingIntent(record.id, ACTION_START))
         }
-        synchronized(notificationLock) {
-            if (!cancelledDownloads.contains(record.id) || record.status == DownloadStatus.PAUSED) {
-                notificationManager.notify(notificationId(record.id), builder.build())
-            }
+        if (record.status == DownloadStatus.RUNNING || record.status == DownloadStatus.PENDING || record.status == DownloadStatus.PAUSED) {
+            builder.addAction(
+                android.R.drawable.ic_menu_close_clear_cancel,
+                getString(R.string.cancel_download),
+                actionPendingIntent(record.id, ACTION_CANCEL),
+            )
         }
+        return builder.build()
     }
 
     private fun ensureForeground() {

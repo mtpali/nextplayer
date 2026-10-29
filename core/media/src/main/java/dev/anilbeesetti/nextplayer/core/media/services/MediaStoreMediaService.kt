@@ -3,16 +3,16 @@ package dev.anilbeesetti.nextplayer.core.media.services
 import android.content.ContentUris
 import android.content.Context
 import android.database.ContentObserver
-import android.os.Build
-import android.os.Bundle
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
-import androidx.annotation.RequiresApi
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.anilbeesetti.nextplayer.core.common.di.ApplicationScope
 import dev.anilbeesetti.nextplayer.core.common.extensions.VIDEO_COLLECTION_URI
 import dev.anilbeesetti.nextplayer.core.common.extensions.prettyName
+import java.io.File
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -26,9 +26,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.withContext
-import java.io.File
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * [MediaService] implementation that queries the Android MediaStore for video files.
@@ -92,13 +89,6 @@ class MediaStoreMediaService @Inject constructor(
     override fun observeVideos(folderPath: String?): Flow<List<MediaVideo>> {
         return mediaChanges
             .map { fetchVideos(folderPath) }
-            .flowOn(Dispatchers.IO)
-            .distinctUntilChanged()
-    }
-
-    override fun observeTrashVideos(): Flow<List<MediaVideo>> {
-        return mediaChanges
-            .map { if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) queryTrashVideos() else emptyList() }
             .flowOn(Dispatchers.IO)
             .distinctUntilChanged()
     }
@@ -176,21 +166,6 @@ class MediaStoreMediaService @Inject constructor(
      * Walks up the directory tree from this file's parent to the root.
      */
     private fun File.walkUp() = generateSequence(parentFile) { it.parentFile }
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    private fun queryTrashVideos(): List<MediaVideo> {
-        val queryArgs = Bundle().apply {
-            putInt(MediaStore.QUERY_ARG_MATCH_TRASHED, MediaStore.MATCH_ONLY)
-            putStringArray(
-                android.content.ContentResolver.QUERY_ARG_SORT_COLUMNS,
-                arrayOf(MediaStore.Video.Media.DATE_MODIFIED),
-            )
-            putInt(android.content.ContentResolver.QUERY_ARG_SORT_DIRECTION, android.content.ContentResolver.QUERY_SORT_DIRECTION_DESCENDING)
-        }
-        return queryVideoCursor {
-            context.contentResolver.query(VIDEO_COLLECTION_URI, VIDEO_PROJECTION, queryArgs, null)
-        }
-    }
 
     private fun queryVideos(folderPath: String?): List<MediaVideo> {
         // A null folderPath scans every storage volume (e.g. SD cards / USB OTG). For a specific

@@ -363,6 +363,7 @@
     <string name="download_running">در حال دانلود</string>
     <string name="download_paused">متوقف شده</string>
     <string name="pause_download">توقف دانلود</string>
+    <string name="cancel_download">لغو دانلود</string>
     <string name="download_complete">تکمیل شده</string>
     <string name="download_progress">%1$d٪ دانلود شده</string>
     <string name="download_size_progress">%1$s از %2$s</string>

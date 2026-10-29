@@ -330,7 +330,6 @@
         <item quantity="other">동영상 %1$d개를 이동했지만 원본을 삭제할 수 없습니다.</item>
     </plurals>
     <string name="cannot_move_to_same_folder">같은 폴더로 이동할 수 없습니다.</string>
-    <string name="history">기록</string>
     <string name="select_decoders">디코더 선택</string>
     <string name="video_decoder">동영상 디코더</string>
     <string name="audio_decoder">오디오 디코더</string>
@@ -344,15 +343,9 @@
     <string name="audio_decoder_mode_not_supported">%1$s 오디오 디코더는 지원되지 않습니다</string>
     <string name="no_supported_decoder">이 미디어에 지원되는 디코더가 없습니다.</string>
     <string name="delete_permanently">영구 삭제</string>
-    <string name="restore">복원</string>
-    <string name="trash">휴지통</string>
     <string name="move_to_trash">휴지통으로 이동</string>
     <string name="move_to_trash_info">선택한 항목을 휴지통으로 이동합니다.</string>
-    <string name="trash_empty_title">휴지통이 비어 있습니다</string>
-    <string name="trash_empty_description">휴지통으로 이동한 동영상이 여기에 표시됩니다. 복원하거나 영구적으로 삭제할 수 있습니다.</string>
     <string name="clear_all">모두 지우기</string>
-    <string name="clear_history_confirmation">시청 기록에서 모든 동영상을 삭제할까요?</string>
     <string name="decoder_mode_auto">자동</string>
     <string name="settings_description">앱 환경설정</string>
-    <string name="more">더보기</string>
 </resources>

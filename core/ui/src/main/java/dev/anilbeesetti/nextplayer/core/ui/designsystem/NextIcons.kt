@@ -33,9 +33,9 @@ import androidx.compose.material.icons.rounded.DeveloperBoard
 import androidx.compose.material.icons.rounded.Dns
 import androidx.compose.material.icons.rounded.DoneAll
 import androidx.compose.material.icons.rounded.DoubleArrow
-import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.DownloadDone
+import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.FastForward
 import androidx.compose.material.icons.rounded.FileOpen
@@ -57,7 +57,6 @@ import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.LocalMovies
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.MiscellaneousServices
-import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Movie
 import androidx.compose.material.icons.rounded.Palette
@@ -176,7 +175,6 @@ object NextIcons {
     val Move = Icons.AutoMirrored.Rounded.DriveFileMove
     val ExtraSettings = Icons.Rounded.MiscellaneousServices
     val MoreVert = Icons.Rounded.MoreVert
-    val More = Icons.Rounded.MoreHoriz
     val DeleteSweep = Icons.Rounded.DeleteSweep
     val Image = Icons.Rounded.Image
     val Frame = Icons.Rounded.FilterFrames

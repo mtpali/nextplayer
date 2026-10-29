@@ -88,7 +88,6 @@ import dev.anilbeesetti.nextplayer.core.ui.components.TopLevelFabState
 import dev.anilbeesetti.nextplayer.core.ui.components.thenIf
 import dev.anilbeesetti.nextplayer.core.ui.components.tvFocusRing
 import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
-import dev.anilbeesetti.nextplayer.feature.more.navigation.MoreRoute
 import dev.anilbeesetti.nextplayer.feature.network.navigation.NetworkRoute
 import dev.anilbeesetti.nextplayer.feature.videopicker.navigation.MediaPickerRoute
 
@@ -104,7 +103,6 @@ enum class TopLevelDestination(
 ) {
     MEDIA(MediaPickerRoute(), NextIcons.Home, R.string.home, TopLevelFabKey.MEDIA),
     NETWORK(NetworkRoute, NextIcons.Network, R.string.network, TopLevelFabKey.NETWORK),
-    MORE(MoreRoute, NextIcons.More, R.string.more, TopLevelFabKey.MORE),
 }
 
 @Composable
@@ -138,6 +136,10 @@ class TopLevelNavState(
 ) {
     var selectedIndex by selectedIndexState
         private set
+
+    init {
+        if (selectedIndex !in destinations.indices) selectedIndexState.intValue = 0
+    }
 
     private val startRoute: NavKey get() = destinations.first().route
 
